@@ -107,12 +107,15 @@ h1, h2, h3 { font-family: var(--font-title); }
 .hot-chips::-webkit-scrollbar { display: none; }
 /* 热词样式同时覆盖 <button> 和 <a class="chip-link">：
    壳是静态生成的热词一律是 <a>（可右键/新标签打开），早先只写了 button 选择器，
-   导致热词一直以裸链接呈现、没有胶囊边框。 */
+   导致热词一直以裸链接呈现、没有胶囊边框。
+   高度直接给到 44px 与上方搜索框齐平：试过用 ::after 撑热区保留 32px 视觉，
+   但 .hot-chips 是 overflow-x:auto（overflow-y 被连带算成 auto），伪元素溢出部分会被裁掉，
+   实测上下各扩 6px 只剩 4px，凑不满 44 —— 所以不玩伪元素，老老实实给足高度。 */
 .hot-chips button,
 .hot-chips .chip-link {
-  flex: none; min-height: 32px; padding: 4px 12px;
-  display: inline-flex; align-items: center;
-  border: 1px solid rgba(255,255,255,.35); border-radius: 16px;
+  flex: none; min-height: 44px; padding: 0 14px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(255,255,255,.35); border-radius: 22px;
   color: #fff; font-size: 13px;
 }
 .hot-chips button:active,
@@ -253,12 +256,16 @@ h1, h2, h3 { font-family: var(--font-title); }
 
 /* ===== 按钮 ===== */
 .btn-cta {
+  display: inline-flex; align-items: center; justify-content: center; text-align: center;
   background: var(--cta); color: #fff; border-radius: 22px;
   padding: 0 20px; min-height: 44px; font-size: 15px; font-weight: 600;
   box-shadow: 0 3px 10px rgba(217,79,48,.35);
 }
 .btn-cta:active { transform: scale(.97); }
+/* 必须显式居中：<button> 浏览器默认 text-align:center，<a> 却是继承值（左对齐），
+   同一个 .btn-ghost 用在 <button id="dlBtn"> 与 <a href="pack.html"> 上时文字位置不一致。 */
 .btn-ghost {
+  display: inline-flex; align-items: center; justify-content: center; text-align: center;
   border: 1px solid var(--teal); color: var(--teal); border-radius: 22px;
   padding: 0 16px; min-height: 44px; font-size: 14px;
   background: rgba(15,118,110,.05);
@@ -268,7 +275,7 @@ h1, h2, h3 { font-family: var(--font-title); }
 .explore-tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin-bottom: 12px; }
 .explore-tabs::-webkit-scrollbar { display: none; }
 .explore-tabs button {
-  flex: none; min-height: 36px; padding: 4px 16px; border-radius: 18px;
+  flex: none; min-height: 44px; padding: 8px 16px; border-radius: 18px;   /* 触控目标 ≥44px */
   background: var(--card); border: 1px solid var(--line); font-size: 14px; color: var(--ink-2);
 }
 .explore-tabs button.active { background: var(--indigo); border-color: var(--indigo); color: #fff; }
@@ -324,9 +331,10 @@ h1, h2, h3 { font-family: var(--font-title); }
 .pack-card.warn h3 { color: var(--cta); }
 .pack-card ul { list-style: none; }
 .pack-card li {
-  font-size: 14px; padding: 8px 0 8px 26px; position: relative;
-  border-top: 1px dashed var(--line); cursor: pointer; min-height: 40px;
+  font-size: 14px; padding: 10px 0 10px 26px; position: relative;
+  border-top: 1px dashed var(--line); cursor: pointer; min-height: 44px;  /* 触控目标 ≥44px */
 }
+.pack-card li:focus-visible { outline: 3px solid var(--teal); outline-offset: -3px; border-radius: 6px; }
 .pack-card li::before {
   content: ""; position: absolute; left: 0; top: 10px;
   width: 18px; height: 18px; border: 2px solid var(--silver); border-radius: 5px;

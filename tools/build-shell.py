@@ -40,6 +40,11 @@ NAV = [
      '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-5.5 8-5.5s6.5 1.5 8 5.5"/>'),
 ]
 
+# 没有自己 Tab 的页面，归到语义上最近的 Tab 下高亮。
+# food.html 只能从首页美食区块进入，若不高亮任何一项，用户进去后完全没有位置感。
+# 注意别把 food 直接加进 NAV：那会给 6 个页面都多出一个 Tab 项。
+TAB_ALIAS = {"food": "explore"}
+
 CHIPS = [
     ("西江", "西江千户苗寨", "index.html?kw=西江"),
     ("下司", "下司古镇", "index.html?kw=下司"),
@@ -93,13 +98,16 @@ def topbar_html(page: str) -> str:
 
 def tabbar_html(page: str) -> str:
     items = []
+    active = TAB_ALIAS.get(page, page)
     for pid, label, href, icon in NAV:
-        cls = "tab active" if pid == page else "tab"
+        # aria-current 让读屏也能判断"我在哪一页"，光有 .active 的配色读屏读不出来
+        cls = "tab active" if pid == active else "tab"
+        aria = ' aria-current="page"' if pid == active else ""
         items.append(
-            '  <a class="%s" href="%s" aria-label="%s">\n'
+            '  <a class="%s" href="%s" aria-label="%s"%s>\n'
             '    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">%s</svg>\n'
             '    <span>%s</span>\n'
-            '  </a>' % (cls, href, label, icon, label)
+            '  </a>' % (cls, href, label, aria, icon, label)
         )
     return (
         "<!-- shell:tabbar — 由 tools/build-shell.py 生成，改壳请改脚本后重跑 -->\n"

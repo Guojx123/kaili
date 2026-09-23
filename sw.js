@@ -7,7 +7,7 @@
  * v7 变更：顶栏/底部 Tab 改为 HTML 静态标记（不再由 defer 脚本注入），HTML 与
  *          layout.js、style.css 全部更新，必须升版本让老缓存失效。
  */
-var CACHE = "kaili-trip-v7";
+var CACHE = "kaili-trip-v8";
 var SHELL = [
   "./",
   "index.html",
@@ -28,6 +28,33 @@ var SHELL = [
   "assets/img/banner-kaili-800.webp"
 ];
 
+/* 内容图不进 SHELL：塞进 SHELL 会让 install 等 24 张图下完，弱网下拖慢激活。
+   但它们又只在"用户真滚到、lazy 触发过"时才进缓存 —— 断网前没滚到就是空白。
+   所以 SHELL 装完后顺手补一轮；单张失败不影响安装，整体还有超时兜底。 */
+var IMAGES = ["xijiang", "xiasi", "langde", "wudong", "qingyun", "xiulitao",
+  "craft-miaoxiu", "craft-yinshi", "craft-ran", "village-cunt", "food-suantang", "moon"]
+  .reduce(function (a, n) {
+    return a.concat(["assets/img/" + n + "-400.webp", "assets/img/" + n + "-800.webp"]);
+  }, []);
+
+function warmUpImages() {
+  // 兜底：无论网络多慢，6 秒后放行 install，别把 activate 一直拖住
+  var timeout = new Promise(function (r) { setTimeout(r, 6000); });
+  var work = caches.open(CACHE).then(function (c) {
+    var i = 0;
+    function nextBatch() {                       // 每批 6 个，别一次打满连接
+      if (i >= IMAGES.length) return Promise.resolve();
+      var batch = IMAGES.slice(i, i + 6);
+      i += 6;
+      return Promise.all(batch.map(function (u) {
+        return c.add(u).catch(function () {});
+      })).then(nextBatch);
+    }
+    return nextBatch();
+  }).catch(function () {});
+  return Promise.race([work, timeout]);
+}
+
 self.addEventListener("install", function (e) {
   e.waitUntil(
     caches.open(CACHE).then(function (c) {
@@ -36,6 +63,7 @@ self.addEventListener("install", function (e) {
         return c.add(u).catch(function () {});
       }));
     }).then(function () { return self.skipWaiting(); })
+     .then(warmUpImages)     // 放在最后：先允许激活，补图片只是顺带
   );
 });
 

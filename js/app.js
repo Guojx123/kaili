@@ -133,31 +133,48 @@
 
   /* ---------- 详情浮层（底部固定预订栏） ---------- */
   var detail = $("#detail"), detailBody = $("#detailBody");
-  var currentDetail = null;
+  var currentDetail = null, lastFocused = null;
   function openDetail(key) {
     var d = DETAILS[key];
     if (!d) { toast("详情整理中…"); return; }
     currentDetail = key;
+    lastFocused = document.activeElement;        // 关闭后要把焦点还回去
     detailBody.innerHTML =
       "<img src='" + d.img + "' alt='" + d.title + "' loading='lazy' decoding='async'>" +
-      "<h2>" + d.title + "</h2>" +
+      "<h2 id='detailTitle'>" + d.title + "</h2>" +
       "<span class='d-tag'>📍 " + d.tag + "</span>" +
       "<p>" + d.desc + "</p>" +
       "<ul>" + d.tips.map(function (t) { return "<li>" + t + "</li>"; }).join("") + "</ul>";
     detail.hidden = false;
     document.body.style.overflow = "hidden";
     syncFavBtn();
+    // 焦点移进浮层：否则键盘用户按 Tab 会跑到被遮住的背景下文里，读屏也不会播报弹出内容
+    var closeBtn = $(".detail-close", detail);
+    if (closeBtn) closeBtn.focus();
   }
   function closeDetail() {
+    if (detail.hidden) return;
     detail.hidden = true;
     document.body.style.overflow = "";
+    if (lastFocused && lastFocused.focus) lastFocused.focus();
+    lastFocused = null;
   }
   document.addEventListener("click", function (e) {
     var t = e.target.closest("[data-detail]");
     if (t) { e.preventDefault(); openDetail(t.dataset.detail); return; }
     if (e.target.closest("[data-close]")) closeDetail();
   });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeDetail(); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") { closeDetail(); return; }
+    // 焦点锁在浮层内：背景只是被遮住、仍在 DOM 里，Tab 默认会走出浮层
+    if (e.key !== "Tab" || !detail || detail.hidden) return;
+    var f = $$("button, [href], [tabindex]:not([tabindex='-1'])", detail)
+      .filter(function (el) { return el.offsetParent !== null; });
+    if (!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
 
   /* ---------- 预订 / 咨询 ---------- */
   document.addEventListener("click", function (e) {
@@ -208,7 +225,10 @@
     });
   }
 
-  /* ---------- 打包清单（行程页 / 我的页联动） ---------- */
+  /* ---------- 打包清单（行程页 / 我的页联动） ----------
+   * 条目 key 取 <li data-pack="...">（由正文派生，增删其他条目互不影响）。
+   * 旧版本用「分类标题::序号」，中间插一条会让后面所有勾选整体错位，
+   * 这里保留旧算法只为把老数据一次性迁移到新 key，迁移后旧 key 删除。 */
   var PACK_KEY = "kaili-pack-2026";
   function loadPack() {
     try { return JSON.parse(localStorage.getItem(PACK_KEY)) || {}; } catch (e) { return {}; }
@@ -216,6 +236,15 @@
   function savePack(s) { try { localStorage.setItem(PACK_KEY, JSON.stringify(s)); } catch (e) {} }
   var packState = loadPack();
   var packList = $("#packList");
+  function legacyKey(li, i) {                     // 旧算法，仅用于迁移
+    var card = li.closest(".pack-card");
+    var head = card ? card.querySelector("h3") : null;
+    return (head ? head.textContent : "card") + "::" + i;
+  }
+  function markLi(li, on) {
+    li.classList.toggle("done", on);
+    li.setAttribute("aria-checked", on ? "true" : "false");   // 读屏要能念出勾选状态
+  }
   function togglePack() {
     if (!packList) return;
     packList.hidden = !packList.hidden;
@@ -224,17 +253,36 @@
     if (pt) pt.textContent = packList.hidden ? "🧳 打包清单" : "🙈 收起清单";
   }
   if (packList) {
+    var migrated = false;
     $$("#packList li").forEach(function (li, i) {
-      var card = li.closest(".pack-card");
-      var head = card ? card.querySelector("h3") : null;
-      var key = (head ? head.textContent : "card") + "::" + i;
-      if (packState[key]) li.classList.add("done");
-      li.addEventListener("click", function () {
-        li.classList.toggle("done");
-        packState[key] = li.classList.contains("done");
-        savePack(packState);
+      var key = li.dataset.pack || legacyKey(li, i);
+      // 老数据迁移：旧 key 勾过、新 key 还没记录 → 沿用旧值后删掉旧 key
+      if (li.dataset.pack) {
+        var old = legacyKey(li, i);
+        if (packState[old] && !(key in packState)) {
+          packState[key] = true;
+          delete packState[old];
+          migrated = true;
+        }
+      }
+      markLi(li, !!packState[key]);
+      li.addEventListener("click", toggle);
+      // 键盘可达：<li role="checkbox" tabindex="0">，空格/回车等价于点击
+      li.addEventListener("keydown", function (e) {
+        if (e.key === " " || e.key === "Spacebar" || e.key === "Enter") {
+          e.preventDefault();          // 空格默认会滚动页面
+          toggle();
+        }
       });
+
+      function toggle() {
+        var on = !li.classList.contains("done");
+        markLi(li, on);
+        packState[key] = on;
+        savePack(packState);
+      }
     });
+    if (migrated) savePack(packState);
     var pt = $("#packToggle");
     if (pt) pt.addEventListener("click", togglePack);
     if (location.hash === "#pack") { packList.hidden = false; }
@@ -245,14 +293,14 @@
   if (meClear) {
     meClear.addEventListener("click", function () {
       packState = {}; savePack(packState);
-      $$("#packList li").forEach(function (li) { li.classList.remove("done"); });
+      $$("#packList li").forEach(function (li) { markLi(li, false); });
       toast("清单勾选已重置");
     });
   }
 
   /* ---------- PWA：注册 Service Worker + 离线下载 ---------- */
   var OFF_KEY = "kaili-offline-ok";
-  var CACHE_NAME = "kaili-trip-v7";   // 必须与 sw.js 的 CACHE 一致，否则离线缓存会被 SW 激活时清理掉
+  var CACHE_NAME = "kaili-trip-v8";   // 必须与 sw.js 的 CACHE 一致，否则离线缓存会被 SW 激活时清理掉
   var PAGES = ["index.html", "explore.html", "trip.html", "pack.html", "me.html", "food.html"];
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").then(function () {

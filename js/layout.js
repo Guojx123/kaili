@@ -36,7 +36,7 @@
 
   /* ---------- 详情浮层（底部固定预订栏） ---------- */
   document.body.appendChild(el(
-    '<div class="detail" id="detail" hidden role="dialog" aria-modal="true">' +
+    '<div class="detail" id="detail" hidden role="dialog" aria-modal="true" aria-labelledby="detailTitle">' +
       '<div class="detail-mask" data-close></div>' +
       '<div class="detail-panel">' +
         '<button class="detail-close" data-close aria-label="关闭">✕</button>' +
