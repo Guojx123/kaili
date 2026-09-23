@@ -52,8 +52,16 @@ CHIPS = [
     ("苗绣", "苗绣", "explore.html?kw=苗绣"),
 ]
 
-# 只有这两页有搜索框；顶栏高度因此不同，是既有设计
-SEARCH_PAGES = ("home", "explore")
+# 有搜索框的页面。美食页 22 家店也需要能搜，所以一并给上。
+SEARCH_PAGES = ("home", "explore", "food")
+# 热词只给前两页：它们是跨页跳转用的，堆在美食页里会跟「分类」抢位置
+CHIP_PAGES = ("home", "explore")
+# 顶栏高度因此不同，是既有设计
+PLACEHOLDER = {
+    "home":    "搜索：西江 / 下司 / 酸汤鱼 / 苗绣",
+    "explore": "搜索：西江 / 下司 / 酸汤鱼 / 苗绣",
+    "food":    "搜索：酸汤 / 牛肉 / 小吃 / 店名",
+}
 
 ICON = ('<svg viewBox="0 0 24 24" width="16" height="16" fill="none" '
         'stroke="currentColor" stroke-width="2">')
@@ -65,9 +73,11 @@ CRITICAL = (
 
 SEARCH_BLOCK = """  <div class="search-wrap">
     <svg class="search-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-    <input id="searchInput" type="search" placeholder="搜索：西江 / 下司 / 酸汤鱼 / 苗绣" autocomplete="off" aria-label="搜索目的地、美食、非遗">
+    <input id="searchInput" type="search" placeholder="%s" autocomplete="off" aria-label="搜索目的地、美食、非遗">
     <button class="search-clear" id="searchClear" hidden aria-label="清空搜索">\u2715</button>
-  </div>
+  </div>%s"""
+
+CHIPS_BLOCK = """
   <div class="hot-chips" id="hotChips">%s
   </div>"""
 
@@ -75,11 +85,13 @@ SEARCH_BLOCK = """  <div class="search-wrap">
 def topbar_html(page: str) -> str:
     search = ""
     if page in SEARCH_PAGES:
-        chips = "".join(
-            '\n    <a class="chip-link" href="%s" data-kw="%s">%s</a>' % (href, kw, label)
-            for kw, label, href in CHIPS
-        )
-        search = "\n" + (SEARCH_BLOCK % chips)
+        chips = ""
+        if page in CHIP_PAGES:
+            chips = CHIPS_BLOCK % "".join(
+                '\n    <a class="chip-link" href="%s" data-kw="%s">%s</a>' % (href, kw, label)
+                for kw, label, href in CHIPS
+            )
+        search = "\n" + (SEARCH_BLOCK % (PLACEHOLDER.get(page, PLACEHOLDER["home"]), chips))
     return (
         "<!-- shell:topbar — 由 tools/build-shell.py 生成，改壳请改脚本后重跑 -->\n"
         '<header class="topbar">\n'

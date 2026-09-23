@@ -7,7 +7,7 @@
  * v7 变更：顶栏/底部 Tab 改为 HTML 静态标记（不再由 defer 脚本注入），HTML 与
  *          layout.js、style.css 全部更新，必须升版本让老缓存失效。
  */
-var CACHE = "kaili-trip-v8";
+var CACHE = "kaili-trip-v9";
 var SHELL = [
   "./",
   "index.html",
@@ -32,7 +32,7 @@ var SHELL = [
    但它们又只在"用户真滚到、lazy 触发过"时才进缓存 —— 断网前没滚到就是空白。
    所以 SHELL 装完后顺手补一轮；单张失败不影响安装，整体还有超时兜底。 */
 var IMAGES = ["xijiang", "xiasi", "langde", "wudong", "qingyun", "xiulitao",
-  "craft-miaoxiu", "craft-yinshi", "craft-ran", "village-cunt", "food-suantang", "moon"]
+  "craft-miaoxiu", "craft-yinshi", "craft-ran", "village-cunt", "food-suantang"]
   .reduce(function (a, n) {
     return a.concat(["assets/img/" + n + "-400.webp", "assets/img/" + n + "-800.webp"]);
   }, []);

@@ -72,6 +72,9 @@
     <button class="me-item" id="meClear">🗑️ 清除勾选<span>重置清单</span></button>
     <button class="me-item" data-consult>💬 联系向导<span>行程咨询</span></button>
   </div>
+  <!-- 收藏列表：由 app.js 渲染。以前点「我的收藏」只是弹个 toast 把名字念一遍 -->
+  <div class="sec-head" id="favHead" hidden><h2>我的收藏</h2><span class="sec-sub" id="favSub"></span></div>
+  <div class="fav-list" id="favList" hidden></div>
   <p class="me-tip">💡 首次打开时可"添加到主屏幕"，即可离线查看完整行程与打包清单。</p>
 </section>
 </main>

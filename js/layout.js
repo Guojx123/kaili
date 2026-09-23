@@ -43,7 +43,7 @@
         '<div class="detail-body" id="detailBody"></div>' +
         '<div class="book-bar">' +
           '<button class="fav-btn" id="favBtn" aria-label="收藏此目的地" aria-pressed="false">♡</button>' +
-          '<div class="book-price"><b>¥128</b><i>起 · 人均参考</i></div>' +
+          '<div class="book-price"><b id="bookPrice">—</b><i id="bookPriceNote">价格以到店为准</i></div>' +
           '<button class="btn-cta book-btn" data-book>立即预订</button>' +
           '<button class="btn-ghost book-btn" data-consult>咨询</button>' +
         '</div>' +

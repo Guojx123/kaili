@@ -382,6 +382,34 @@ h1, h2, h3 { font-family: var(--font-title); }
 .me-item span { font-size: 12px; color: var(--ink-2); }
 .me-tip { margin-top: 16px; font-size: 13px; color: var(--ink-2); }
 
+/* ===== 收藏列表（我的页，点「我的收藏」展开） ===== */
+.fav-list { display: flex; flex-direction: column; gap: 8px; }
+.fav-row {
+  display: flex; align-items: center; gap: 10px;
+  min-height: 64px; padding: 10px; cursor: pointer;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+}
+.fav-row:active { opacity: .82; }
+.fav-row img,
+.fav-row .fav-face {
+  flex: none; width: 56px; height: 56px; border-radius: 8px; object-fit: cover;
+}
+.fav-row .fav-face {
+  display: flex; align-items: center; justify-content: center; font-size: 26px;
+  background: linear-gradient(135deg, rgba(27,58,92,.07), rgba(15,118,110,.12));
+}
+.fav-row > div { flex: 1; min-width: 0; }
+.fav-row b { display: block; font-size: 15px; }
+.fav-row i {
+  display: block; font-style: normal; font-size: 12px; color: var(--ink-2); margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.fav-row .fav-go { flex: none; font-size: 20px; color: var(--silver); }
+.fav-empty {
+  padding: 14px; font-size: 13px; color: var(--ink-2); line-height: 1.6;
+  background: var(--card); border: 1px dashed var(--line); border-radius: var(--radius);
+}
+
 /* ===== 详情浮层 + 固定预订栏 ===== */
 .detail { position: fixed; inset: 0; z-index: 90; }
 .detail-mask { position: absolute; inset: 0; background: rgba(27,58,92,.55); }
@@ -399,6 +427,16 @@ h1, h2, h3 { font-family: var(--font-title); }
 }
 .detail-body { overflow-y: auto; padding: 18px 16px 16px; }
 .detail-body img { border-radius: var(--radius); width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+/* 无照片条目（多为美食店）的头图：与列表卡片用同一个 emoji，避免硬塞风景照 */
+.detail-body .detail-emoji {
+  border-radius: var(--radius); width: 100%; aspect-ratio: 16/9;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 60px; line-height: 1;
+  background: linear-gradient(135deg, rgba(27,58,92,.07), rgba(15,118,110,.12));
+}
+/* 手绘 SVG 图标头图：铺满整个 16:9 容器，自带头图底色，不再透出渐变 */
+.detail-body .detail-emoji.detail-icon { background: none; padding: 0; }
+.detail-body .detail-emoji.detail-icon svg { width: 100%; height: 100%; display: block; border-radius: var(--radius); }
 .detail-body h2 { font-size: 22px; color: var(--indigo); margin: 12px 0 4px; }
 .detail-body .d-tag { font-size: 12px; color: var(--teal); }
 .detail-body p { margin-top: 10px; font-size: 15px; color: var(--ink); }
