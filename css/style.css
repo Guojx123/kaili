@@ -3,6 +3,19 @@
    苗银 #C0C7D1 | 米白 #FAF7F0 | 正文 #1F2937
    标题 思源宋体/霞鹜文楷 · 正文 PingFang SC / Noto Sans SC */
 
+/* ===== 标题字体：自托管子集 =====
+   源字体 Noto Serif SC（Copyright 2017-2024 Adobe，SIL Open Font License 1.1）
+   已按本站标题实际用字子集化，保留 wght 200-900 可变轴。
+   单文件 167KB 取代原先 Google Fonts 的 221KB CSS + 1195KB 字体分片，且不再依赖第三方域名。
+   新增/修改标题文案后，请重跑 tools/subset-font.py 重新生成。 */
+@font-face {
+  font-family: "Noto Serif SC";
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;                       /* 字体未到货时先用系统宋体渲染，避免白屏 */
+  src: url("../assets/fonts/noto-serif-sc-subset.woff2") format("woff2");
+}
+
 :root {
   --indigo: #1B3A5C;
   --teal: #0F766E;
@@ -15,7 +28,8 @@
   --line: #E7E2D8;
   --radius: 14px;
   --pad: 16px;           /* 移动端卡片边距 16px */
-  --font-title: "LXGW WenKai", "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif;
+  /* 标题字体：Noto Serif SC 由页面异步加载；未到货前用系统宋体兜底，避免字体切换时版式跳动 */
+  --font-title: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
   --font-body: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
 }
 
@@ -392,9 +406,12 @@ h1, h2, h3 { font-family: var(--font-title); }
 .tabbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 80;
   display: flex; justify-content: space-around;
-  background: rgba(255,255,255,.96); backdrop-filter: blur(8px);
+  /* 原来这里是 backdrop-filter: blur(8px)，滚动时每帧都要重新合成模糊，移动端持续掉帧；
+     底部栏本身是纯色浅底，用不透明背景视觉几乎无差别，但省掉整层合成开销 */
+  background: #fff;
   border-top: 1px solid var(--line);
   padding-bottom: env(safe-area-inset-bottom);
+  contain: layout paint;
 }
 .tab {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
@@ -487,4 +504,15 @@ h1, h2, h3 { font-family: var(--font-title); }
 }
 .pack-note b { color: var(--teal); }
 .pack-card.tip { border-color: rgba(15,118,110,.4); background: #F0F9F7; }
+
+/* ===== 渲染性能：长列表延迟渲染 =====
+   下方内容未进入视口前跳过布局与绘制，降低首页/探索页/美食页的首屏渲染成本。
+   不支持该属性的浏览器直接忽略，无副作用。 */
+.food-list,
+.note-list,
+.cul-list {
+  content-visibility: auto;
+  contain-intrinsic-size: 720px;
+  contain-intrinsic-size: auto 720px;   /* 记住上次真实高度，避免滚动条跳动 */
+}
 .pack-card.tip h3 { color: var(--teal); }

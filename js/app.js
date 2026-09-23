@@ -56,6 +56,21 @@
   if (searchInput) {
     var searchClear = $("#searchClear");
     var searchDebounce;
+    var SEARCH_CARDS = [".dest-card", ".craft-card", ".food-item", ".route-card", ".note-card", ".ex-card", ".cul-card"];
+    var SEARCH_GROUPS = [[".hscroll", ".dest-card"], [".craft-grid", ".craft-card"], [".food-list", ".food-item"],
+      [".route-grid", ".route-card"], [".note-list", ".note-card"], [".cul-list", ".cul-card"], ["#exploreGrid", ".ex-card"]];
+    // 卡片文本只在首次搜索时读一遍并缓存：避免每敲一个字都遍历几十个节点读 textContent（会强制重排）
+    var searchIndex = null;
+    function buildSearchIndex() {
+      if (searchIndex) return searchIndex;
+      searchIndex = [];
+      SEARCH_CARDS.forEach(function (sel) {
+        $$(sel).forEach(function (card) {
+          searchIndex.push({ el: card, text: (card.textContent + " " + (card.dataset.keywords || "")).toLowerCase() });
+        });
+      });
+      return searchIndex;
+    }
     function runSearch(kw) {
       kw = (kw || "").trim();
       searchClear.hidden = !kw;
@@ -64,23 +79,17 @@
         return;
       }
       var kwLower = kw.toLowerCase();
-      var selectors = [".dest-card", ".craft-card", ".food-item", ".route-card", ".note-card", ".ex-card", ".cul-card"];
-      selectors.forEach(function (sel) {
-        $$(sel).forEach(function (card) {
-          var text = (card.textContent + " " + (card.dataset.keywords || "")).toLowerCase();
-          card.classList.toggle("hide-by-search", text.indexOf(kwLower) === -1);
-        });
+      buildSearchIndex().forEach(function (item) {
+        item.el.classList.toggle("hide-by-search", item.text.indexOf(kwLower) === -1);
       });
-      [[".hscroll", ".dest-card"], [".craft-grid", ".craft-card"], [".food-list", ".food-item"],
-       [".route-grid", ".route-card"], [".note-list", ".note-card"], [".cul-list", ".cul-card"], ["#exploreGrid", ".ex-card"]]
-        .forEach(function (pair) {
-          var wrap = $(pair[0]);
-          if (!wrap) return;
-          var any = $$(pair[1], wrap).some(function (c) { return !c.classList.contains("hide-by-search"); });
-          wrap.classList.toggle("hide-by-search", !any);
-          var head = wrap.previousElementSibling;
-          if (head && head.classList.contains("sec-head")) head.classList.toggle("hide-by-search", !any);
-        });
+      SEARCH_GROUPS.forEach(function (pair) {
+        var wrap = $(pair[0]);
+        if (!wrap) return;
+        var any = $$(pair[1], wrap).some(function (c) { return !c.classList.contains("hide-by-search"); });
+        wrap.classList.toggle("hide-by-search", !any);
+        var head = wrap.previousElementSibling;
+        if (head && head.classList.contains("sec-head")) head.classList.toggle("hide-by-search", !any);
+      });
     }
     searchInput.addEventListener("input", function () {
       clearTimeout(searchDebounce);
@@ -243,6 +252,7 @@
 
   /* ---------- PWA：注册 Service Worker + 离线下载 ---------- */
   var OFF_KEY = "kaili-offline-ok";
+  var CACHE_NAME = "kaili-trip-v6";   // 必须与 sw.js 的 CACHE 一致，否则离线缓存会被 SW 激活时清理掉
   var PAGES = ["index.html", "explore.html", "trip.html", "pack.html", "me.html", "food.html"];
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").then(function () {
@@ -257,12 +267,23 @@
     var urls = ["./"].concat(PAGES).concat([
       "css/style.css", "js/app.js", "js/layout.js", "js/data.js", "manifest.webmanifest",
       "assets/icon-192.png", "assets/icon-512.png",
+      "assets/fonts/noto-serif-sc-subset.woff2",
       "assets/img/banner-kaili-400.webp", "assets/img/banner-kaili-800.webp"]);
     ["xijiang", "xiasi", "langde", "wudong", "qingyun", "xiulitao",
      "craft-miaoxiu", "craft-yinshi", "craft-ran", "village-cunt", "food-suantang", "moon"]
       .forEach(function (n) { urls.push("assets/img/" + n + "-400.webp", "assets/img/" + n + "-800.webp"); });
-    caches.open("kaili-trip-v3").then(function (c) {
-      return c.addAll(urls);
+    caches.open(CACHE_NAME).then(function (c) {
+      // 分批预取（每批 6 个）：一次并发 30+ 请求会把连接和带宽瞬间打满，弱网下反而更慢甚至超时
+      var i = 0;
+      function nextBatch() {
+        if (i >= urls.length) return Promise.resolve();
+        var batch = urls.slice(i, i + 6);
+        i += 6;
+        return Promise.all(batch.map(function (u) {
+          return c.add(u).catch(function () {});
+        })).then(nextBatch);
+      }
+      return nextBatch();
     }).then(function () {
       localStorage.setItem(OFF_KEY, "1");
       var os = $("#offlineState");
@@ -318,12 +339,14 @@
   }
 
   /* ---------- 回到顶部（全站） ---------- */
-  var topBtn = $("#topBtn"), ticking = false;
+  // 只在显隐状态真正翻转时才写 DOM，避免每帧滚动都触发属性写入与样式重算
+  var topBtn = $("#topBtn"), ticking = false, topBtnShown = false;
   window.addEventListener("scroll", function () {
     if (ticking) return;
     ticking = true;
     requestAnimationFrame(function () {
-      topBtn.hidden = window.scrollY < 480;
+      var show = window.scrollY >= 480;
+      if (topBtn && show !== topBtnShown) { topBtn.hidden = !show; topBtnShown = show; }
       ticking = false;
     });
   }, { passive: true });

@@ -1,5 +1,11 @@
-/* Service Worker：凯里行 PWA 离线支持 */
-var CACHE = "kaili-trip-v4";
+/* Service Worker：凯里行 PWA 离线支持
+ * v6 策略：全站 stale-while-revalidate
+ *   - 命中缓存 → 立即返回（首屏不等网络），同时后台静默拉取最新版写回缓存
+ *   - 未命中缓存 → 走网络，失败时回退到相应兜底页
+ * 相比 v4 的"网络优先"，重复访问不再被网络往返卡住；部署新版后下一次导航自动生效。
+ * v6 变更：标题字体改为自托管子集，纳入预缓存清单。
+ */
+var CACHE = "kaili-trip-v6";
 var SHELL = [
   "./",
   "index.html",
@@ -14,13 +20,20 @@ var SHELL = [
   "js/data.js",
   "manifest.webmanifest",
   "assets/icon-192.png",
-  "assets/icon-512.png"
+  "assets/icon-512.png",
+  "assets/fonts/noto-serif-sc-subset.woff2",
+  "assets/img/banner-kaili-400.webp",
+  "assets/img/banner-kaili-800.webp"
 ];
 
 self.addEventListener("install", function (e) {
   e.waitUntil(
-    caches.open(CACHE).then(function (c) { return c.addAll(SHELL); })
-      .then(function () { return self.skipWaiting(); })
+    caches.open(CACHE).then(function (c) {
+      // 逐个缓存：单个资源缺失不会让整个安装失败（addAll 是"全有或全无"）
+      return Promise.all(SHELL.map(function (u) {
+        return c.add(u).catch(function () {});
+      }));
+    }).then(function () { return self.skipWaiting(); })
   );
 });
 
@@ -33,53 +46,42 @@ self.addEventListener("activate", function (e) {
   );
 });
 
+var ORIGIN = self.location.origin;
+
+/* 缓存即时命中 + 后台更新；未命中回退网络，网络也失败再用 fallback 页 */
+function staleWhileRevalidate(e, fallback) {
+  var req = e.request;
+  e.respondWith(
+    caches.open(CACHE).then(function (cache) {
+      return cache.match(req).then(function (cached) {
+        var fromNetwork = fetch(req).then(function (res) {
+          if (res && res.ok && res.type !== "opaque") cache.put(req, res.clone());
+          return res;
+        }).catch(function () { return null; });
+
+        if (cached) return cached;          // 命中：不等待网络，后台自行更新
+        return fromNetwork.then(function (res) {
+          if (res) return res;
+          return caches.match(fallback || req).then(function (r) { return r || Response.error(); });
+        });
+      });
+    })
+  );
+}
+
 self.addEventListener("fetch", function (e) {
   var req = e.request;
   if (req.method !== "GET") return;
 
-  // HTML 导航请求：网络优先，失败回退缓存（离线看行程）
-  if (req.mode === "navigate") {
-    e.respondWith(
-      fetch(req).then(function (res) {
-        var copy = res.clone();
-        caches.open(CACHE).then(function (c) { c.put(req, copy); });
-        return res;
-      }).catch(function () {
-        return caches.match(req).then(function (r) { return r || caches.match("index.html"); });
-      })
-    );
-    return;
-  }
+  var url = req.url;
+  if (url.indexOf("http") !== 0) return;            // 跳过 chrome-extension 等非 http(s) 请求
 
-  // 同源 JS/CSS/manifest：网络优先（保证部署后立刻生效），失败回退缓存
-  if (req.url.indexOf(self.location.origin) === 0 &&
-      /\.(js|css|webmanifest|json)(\?|$)/.test(req.url)) {
-    e.respondWith(
-      fetch(req).then(function (res) {
-        if (res.ok) {
-          var copy = res.clone();
-          caches.open(CACHE).then(function (c) { c.put(req, copy); });
-        }
-        return res;
-      }).catch(function () {
-        return caches.match(req);
-      })
-    );
-    return;
-  }
+  // HTML 导航：缓存优先，离线回退到首页
+  if (req.mode === "navigate") { staleWhileRevalidate(e, "index.html"); return; }
 
-  // 图片/字体等：缓存优先
-  e.respondWith(
-    caches.match(req).then(function (cached) {
-      if (cached) return cached;
-      return fetch(req).then(function (res) {
-        if (res.ok && (req.url.indexOf(self.location.origin) === 0 ||
-            req.url.indexOf("fonts.g") > -1)) {
-          var copy = res.clone();
-          caches.open(CACHE).then(function (c) { c.put(req, copy); });
-        }
-        return res;
-      }).catch(function () { return cached; });
-    })
-  );
+  // 同源静态资源（JS/CSS/图片/图标/manifest）与 Google Fonts：同样的缓存优先 + 后台更新
+  if (url.indexOf(ORIGIN) === 0 || url.indexOf("fonts.g") > -1) {
+    staleWhileRevalidate(e);
+  }
+  // 其余第三方请求不拦截，走默认网络
 });

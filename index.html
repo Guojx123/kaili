@@ -12,10 +12,12 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="assets/icon-192.png">
 <link rel="apple-touch-icon" href="assets/icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700;900&display=swap" rel="stylesheet">
+<!-- 标题字体已自托管为子集（assets/fonts/noto-serif-sc-subset.woff2），不再请求 Google Fonts -->
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/noto-serif-sc-subset.woff2" crossorigin>
 <link rel="stylesheet" href="css/style.css">
+<link rel="preload" as="image" href="assets/img/banner-kaili-800.webp"
+      imagesrcset="assets/img/banner-kaili-400.webp 400w, assets/img/banner-kaili-800.webp 800w"
+      imagesizes="(max-width:640px) 100vw, 720px" fetchpriority="high">
 </head>
 <body data-page="home">
 

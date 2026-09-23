@@ -1,3 +1,6 @@
 .DS_Store
 *.pyc
 __pycache__/
+
+# 字体子集化工具的源字体缓存（24MB，可重新下载）
+tools/.cache/

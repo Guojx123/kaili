@@ -6,14 +6,30 @@ services:
     staticPublishPath: .
     pullRequestPreviewsEnabled: false
     headers:
+      # SW 脚本本身必须每次协商，否则更新不生效
       - pattern: "/sw.js"
         headers:
           - key: Cache-Control
             value: "no-cache"
-      - pattern: "/assets/img/*.webp"
+      # 图片/图标内容不变，长缓存
+      - pattern: "/assets/*"
         headers:
           - key: Cache-Control
             value: "public, max-age=31536000, immutable"
+      # CSS/JS：短期强缓存 + 过期后后台异步更新；SW 已负责即时生效，这里只是让浏览器 HTTP 缓存也能直接命中
+      - pattern: "/css/*"
+        headers:
+          - key: Cache-Control
+            value: "public, max-age=300, stale-while-revalidate=604800"
+      - pattern: "/js/*"
+        headers:
+          - key: Cache-Control
+            value: "public, max-age=300, stale-while-revalidate=604800"
+      # HTML 保持协商，保证部署后立刻拿到新版本
+      - pattern: "/*.html"
+        headers:
+          - key: Cache-Control
+            value: "public, max-age=0, must-revalidate"
     routes:
       - type: rewrite
         source: /
