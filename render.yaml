@@ -1,6 +1,11 @@
 services:
   - type: web
-    name: kaili-travel
+    # 必须与 Render 上实际的服务名一致（线上地址是 kaili.onrender.com，服务名就是 kaili）。
+    # 早先这里写的是 kaili-travel，与线上对不上，导致下方 headers 整段被忽略：
+    # 线上所有资源一直返回 Render 默认的 `public, max-age=0, s-maxage=300`。
+    # 注意：改这里只在 Blueprint 已被 Render 关联时才会生效；若服务当初是手动创建的，
+    # 需要在 Render 控制台的 Blueprint 页面手动 Sync 一次。
+    name: kaili
     runtime: static
     buildCommand: echo "静态站点，无需构建"
     staticPublishPath: .
