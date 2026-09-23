@@ -82,6 +82,20 @@ h1, h2, h3 { font-family: var(--font-title); }
   pointer-events: none;
 }
 
+/* ===== 手绘 SVG 图标 =====
+   全站不再用 emoji 或字符图标（✕ ↑ ♡ ❤ 📍 › ✓ …）：emoji 各平台字形不一致，
+   字符图标又会随字体 fallback 变形、粗细跳动。现在统一画成 24×24 线性图标，
+   定义在 body 顶部的雪碧图里（tools/build-shell.py 注入），引用方式：
+       <svg class="ic"><use href="#i-heart"/></svg>
+   尺寸走 em（跟字号一起缩放），描边 currentColor（跟文字颜色走）。
+   少数需要实心的点缀（眼睛、圆点）在 symbol 里显式 fill="currentColor"。 */
+.ic-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+.ic {
+  width: 1em; height: 1em; display: inline-block; flex: none; vertical-align: -.125em;
+  fill: none; stroke: currentColor; stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+
 /* ===== 顶部吸顶 ===== */
 .topbar {
   position: sticky; top: 0; z-index: 50;
@@ -92,17 +106,26 @@ h1, h2, h3 { font-family: var(--font-title); }
   padding: calc(6px + env(safe-area-inset-top)) var(--pad) 8px;
   box-shadow: 0 2px 10px rgba(27,58,92,.25);
 }
-.topbar-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+/* 吸顶搜索：整条顶栏吸顶要吃掉 146px（390×844 机型的 1/6），太占屏。
+   改成「负 top」——滚动时顶栏跟着页面上移，把定位行和热词顶出屏幕，
+   只把最后一行（搜索框）钉在顶部，从 146px 降到 48px。
+   偏移量 = 搜索框在顶栏内的上边距：6 + 安全区 + 44(定位行) + 6 + 36(热词) + 6。
+   减掉安全区后正好让搜索框停在状态栏下沿，所以两个值都是常量、与设备无关。
+   纯 CSS 实现——不改高度、不做动画，下面的内容不会有跳动；滚回顶部自动复原。 */
+.topbar.has-search { top: -56px; }        /* 有搜索框、无热词（美食页） */
+.topbar.has-chips  { top: -98px; }        /* 有热词（首页 / 探索页），写在后面覆盖上一行 */
+.topbar-row { display: flex; flex-wrap: nowrap; align-items: center; justify-content: space-between; gap: 8px; }
 .loc-btn {
   display: inline-flex; align-items: center; gap: 4px;
   color: var(--silver); font-size: 14px; min-height: 44px;
+  flex: none; white-space: nowrap;   /* 吸顶偏移量是按行高算的，定位文字换行会让算好的偏移错位 */
 }
-.topbar-title { font-family: var(--font-title); font-size: 15px; letter-spacing: 1px; color: #fff; opacity: .9; }
+.topbar-title { font-family: var(--font-title); font-size: 15px; letter-spacing: 1px; color: #fff; opacity: .9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .search-wrap {
   margin-top: 6px; display: flex; align-items: center; gap: 8px;
   background: #fff; border-radius: 20px; padding: 0 12px; height: 40px;
 }
-.search-ico { color: var(--ink-2); flex: none; }
+.search-ico { color: var(--ink-2); flex: none; font-size: 18px; }   /* .ic 用 em 定尺寸，这里给字号 */
 #searchInput {
   flex: 1; border: 0; outline: none; font-size: 16px; min-height: 40px;
   background: transparent; color: var(--ink);
@@ -113,7 +136,9 @@ h1, h2, h3 { font-family: var(--font-title); }
 #searchInput::-webkit-search-decoration {
   -webkit-appearance: none; appearance: none; display: none;
 }
-.search-clear { color: var(--ink-2); width: 40px; min-height: 40px; }
+/* 图标按钮也要自己居中（<button> 的 text-align:center 是 UA 默认值，靠不住） */
+.search-clear { color: var(--ink-2); width: 40px; min-height: 40px; display: grid; place-items: center; font-size: 15px; }
+.search-clear:active { color: var(--cta); }
 .hot-chips { display: flex; gap: 8px; margin-top: 6px; overflow-x: auto; scrollbar-width: none; }
 .hot-chips::-webkit-scrollbar { display: none; }
 /* 热词样式同时覆盖 <button> 和 <a class="chip-link">：
@@ -167,7 +192,8 @@ h1, h2, h3 { font-family: var(--font-title); }
   background: var(--card); border-radius: var(--radius);
   padding: 10px 12px; border: 1px solid var(--line);
 }
-.wx-item .wx-ico { font-size: 20px; }
+.wx-item .wx-ic { font-size: 22px; color: #B5763A; flex: none; }   /* 暖色调：太阳 / 满月 */
+.wx-item .wx-ic.teal { color: var(--teal); }                       /* 节庆类用青绿 */
 .wx-item b { display: block; font-size: 14px; color: var(--indigo); }
 .wx-item i { font-style: normal; font-size: 12px; color: var(--ink-2); }
 
@@ -249,6 +275,14 @@ h1, h2, h3 { font-family: var(--font-title); }
   border-radius: var(--radius); padding: 10px 12px; position: relative;
 }
 .food-item img { width: 72px; height: 72px; object-fit: cover; border-radius: 10px; flex: none; }
+/* 无照片的美食条目：手绘 SVG 图标 + 同详情头图一致的底色方块，取代原来的 emoji。
+   尺寸与 .food-item img（72×72）对齐，列表里图文两列才不会一高一低。 */
+.food-ic {
+  width: 72px; height: 72px; flex: none; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, rgba(27,58,92,.07), rgba(15,118,110,.12));
+  font-size: 34px; color: var(--teal);
+}
 .food-emoji { font-size: 30px; width: 72px; text-align: center; flex: none; }
 .food-item h3 { font-size: 15px; color: var(--indigo); }
 .food-item p { font-size: 12px; color: var(--ink-2); }
@@ -368,11 +402,18 @@ h1, h2, h3 { font-family: var(--font-title); }
   width: 18px; height: 18px; border: 2px solid var(--silver); border-radius: 5px;
 }
 .pack-card li.done { color: #9AA3B0; text-decoration: line-through; }
+/* 勾选标记：伪元素里塞不了 <use>，这里内联一份手绘对勾（与 #i-check 同形状），
+   免得用字符「✓」——它会随系统字体 fallback 换字形、粗细也不受控。 */
 .pack-card li.done::before {
-  background: var(--teal); border-color: var(--teal);
-  content: "✓"; color: #fff; font-size: 12px; text-align: center; line-height: 18px;
-  text-decoration: none;
+  border-color: var(--teal);
+  background: var(--teal)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.6 4.6 4.6L19 6.6'/%3E%3C/svg%3E")
+    center / 14px 14px no-repeat;
 }
+
+/* 标题里的小图标（打包分类 / 文化条目 / 美食分区）：青绿点缀，跟着标题字号走 */
+.h-ico { font-size: 17px; color: var(--teal); vertical-align: -2px; margin-right: 6px; }
+.pack-card.warn .h-ico, .pack-card.warn h3 { color: var(--cta); }
 
 /* ===== 苗侗文化 ===== */
 .culture-hero {
@@ -389,26 +430,80 @@ h1, h2, h3 { font-family: var(--font-title); }
 .cul-card h3 { font-size: 16px; color: var(--indigo); }
 .cul-card p { font-size: 13px; color: var(--ink-2); margin-top: 4px; }
 
-/* ===== 我的 ===== */
-.me-card {
-  display: flex; align-items: center; gap: 12px;
+/* ===== 我的 =====
+   结构：行程卡（这趟行程是谁 / 什么时候 / 还有多久）→ 工具箱（会变的四格）→
+   快捷入口（列表，带 › 表示跳转）→ 收藏列表 → 提示。
+   图标全部走雪碧图，不再用 emoji。 */
+.me-hero {
   background: linear-gradient(120deg, var(--indigo), var(--teal));
-  border-radius: var(--radius); padding: 16px; color: #fff; margin-bottom: 14px;
+  border-radius: var(--radius); padding: 16px; color: #fff;
 }
+.me-hero-top { display: flex; align-items: center; gap: 12px; }
 .me-avatar {
-  width: 52px; height: 52px; border-radius: 14px; flex: none;
-  background: var(--cta); display: grid; place-items: center;
-  font-family: var(--font-title); font-size: 24px; font-weight: 900;
+  width: 54px; height: 54px; border-radius: 16px; flex: none;
+  background: rgba(255,255,255,.14); display: grid; place-items: center;
+  font-size: 32px; color: #F2B65A;   /* 苗绣菱形纹样，暖色在靛蓝底上才跳得出来 */
 }
-.me-card b { display: block; font-size: 17px; }
-.me-card i { font-style: normal; font-size: 12px; color: var(--silver); }
+.me-hero-txt { min-width: 0; }
+.me-hero h2 { font-size: 19px; color: #fff; }
+.me-hero-meta {
+  font-size: 12px; color: var(--silver); margin-top: 2px;
+  display: flex; align-items: center; gap: 4px;
+}
+.me-hero-meta .ic { font-size: 14px; }
+.me-dot { opacity: .6; }
+.me-stats { display: flex; gap: 8px; margin-top: 14px; }
+.me-stat {
+  flex: 1; text-align: center; padding: 8px 4px;
+  background: rgba(255,255,255,.12); border-radius: 10px;
+}
+.me-stat b { display: block; font-family: var(--font-title); font-size: 18px; }
+.me-stat i { font-style: normal; font-size: 11px; color: var(--silver); }
+
+/* 工具箱：40px 圆角图标 + 标题 + 状态行 */
 .me-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .me-item {
   background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
-  padding: 14px; text-align: left; display: flex; flex-direction: column; gap: 2px; font-size: 15px;
+  padding: 14px; text-align: left; font-size: 15px;
+  display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: center;
 }
-.me-item span { font-size: 12px; color: var(--ink-2); }
-.me-tip { margin-top: 16px; font-size: 13px; color: var(--ink-2); }
+.me-item > span:last-child { min-width: 0; }
+.me-item b { display: block; font-size: 15px; font-weight: 600; color: var(--ink); }
+.me-item i { display: block; font-style: normal; font-size: 12px; color: var(--ink-2); margin-top: 1px; }
+.me-item:active { border-color: var(--teal); background: rgba(15,118,110,.04); }
+
+/* 快捷入口：图标 + 文案 + 右侧 › */
+.me-rows { display: grid; gap: 10px; }
+.me-row {
+  width: 100%; min-height: 56px; text-align: left;
+  display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: center;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 8px 12px;
+}
+.me-row > span:nth-child(2) { min-width: 0; }
+.me-row b { display: block; font-size: 15px; font-weight: 500; color: var(--ink); }
+.me-row i {
+  display: block; font-style: normal; font-size: 12px; color: var(--ink-2); margin-top: 1px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.me-row .ic-go { font-size: 18px; color: var(--silver); }
+.me-row:active { background: rgba(27,58,92,.04); }
+.me-row.danger b, .me-row.danger .ic-go { color: var(--cta); }
+.me-row.danger .me-ic { background: rgba(217,79,48,.10); color: var(--cta); }
+
+/* 图标底座：工具箱 40px / 列表 36px，圆角与卡片语言一致 */
+.me-ico, .me-ic {
+  display: grid; place-items: center; border-radius: 12px;
+  background: rgba(15,118,110,.10); color: var(--teal);
+}
+.me-ico { width: 40px; height: 40px; font-size: 22px; }
+.me-ic  { width: 36px; height: 36px; font-size: 20px; }
+
+.me-tip {
+  margin-top: 16px; font-size: 13px; color: var(--ink-2);
+  display: flex; gap: 8px; align-items: flex-start;
+}
+.me-tip .ic { font-size: 18px; color: #B5763A; flex: none; margin-top: 2px; }
 
 /* ===== 收藏列表（我的页，点「我的收藏」展开） ===== */
 .fav-list { display: flex; flex-direction: column; gap: 8px; }
@@ -425,6 +520,7 @@ h1, h2, h3 { font-family: var(--font-title); }
 .fav-row .fav-face {
   display: flex; align-items: center; justify-content: center; font-size: 26px;
   background: linear-gradient(135deg, rgba(27,58,92,.07), rgba(15,118,110,.12));
+  color: var(--indigo);
 }
 .fav-row > div { flex: 1; min-width: 0; }
 .fav-row b { display: block; font-size: 15px; }
@@ -451,7 +547,8 @@ h1, h2, h3 { font-family: var(--font-title); }
 .detail-close {
   position: absolute; top: 10px; right: 10px; z-index: 2;
   width: 36px; height: 36px; border-radius: 50%;
-  background: rgba(250,247,240,.9); color: var(--ink); font-size: 15px;
+  background: rgba(250,247,240,.9); color: var(--ink);
+  font-size: 17px; display: grid; place-items: center;   /* 图标按钮自己居中 */
 }
 .detail-body { overflow-y: auto; padding: 18px 16px 16px; }
 .detail-body img { border-radius: var(--radius); width: 100%; aspect-ratio: 16/9; object-fit: cover; }
@@ -466,7 +563,11 @@ h1, h2, h3 { font-family: var(--font-title); }
 .detail-body .detail-emoji.detail-icon { background: none; padding: 0; }
 .detail-body .detail-emoji.detail-icon svg { width: 100%; height: 100%; display: block; border-radius: var(--radius); }
 .detail-body h2 { font-size: 22px; color: var(--indigo); margin: 12px 0 4px; }
-.detail-body .d-tag { font-size: 12px; color: var(--teal); }
+.detail-body .d-tag {
+  font-size: 12px; color: var(--teal);
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.detail-body .d-tag .ic { font-size: 14px; }
 .detail-body p { margin-top: 10px; font-size: 15px; color: var(--ink); }
 .detail-body ul { margin: 10px 0 0 18px; font-size: 14px; color: var(--ink-2); }
 .book-bar {
@@ -544,6 +645,7 @@ h1, h2, h3 { font-family: var(--font-title); }
 }
 
 /* ===== 收藏按钮（预订栏内） ===== */
+/* 收藏按钮：心形是描边图标，靠 fill 切换成实心（symbol 里没有写死 fill，能继承下来） */
 .fav-btn {
   flex: none; width: 44px; height: 44px; border-radius: 50%;
   display: grid; place-items: center; font-size: 22px;
@@ -552,6 +654,7 @@ h1, h2, h3 { font-family: var(--font-title); }
 }
 .fav-btn:active { transform: scale(.9); }
 .fav-btn.on { color: var(--cta); background: rgba(217,79,48,.10); }
+.fav-btn.on .ic { fill: currentColor; }
 
 /* ===== 回到顶部 ===== */
 #topBtn {
@@ -582,7 +685,9 @@ h1, h2, h3 { font-family: var(--font-title); }
   .pack-grid { grid-template-columns: 1fr 1fr; }
   .cul-list { grid-template-columns: 1fr 1fr; }
   .note-list { grid-template-columns: 1fr 1fr; }
-  .me-grid { grid-template-columns: repeat(4, 1fr); }
+  /* 工具箱卡片带 40px 图标，640px 下排 4 列会把标题挤成两行，这里仍是 2 列 */
+  .me-grid { grid-template-columns: repeat(2, 1fr); }
+  .me-rows { grid-template-columns: 1fr 1fr; }
   .day-card { padding: 18px; }
   .stop-list li { grid-template-columns: 120px 1fr; }
   .detail-panel {
@@ -601,6 +706,7 @@ h1, h2, h3 { font-family: var(--font-title); }
   .food-list { grid-template-columns: 1fr 1fr; }
   .banner img { aspect-ratio: 21/8; }
   .view { padding: 32px; }
+  .me-grid { grid-template-columns: repeat(4, 1fr); }
 }
 
 /* 打印 */

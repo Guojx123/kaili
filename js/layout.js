@@ -39,10 +39,10 @@
     '<div class="detail" id="detail" hidden role="dialog" aria-modal="true" aria-labelledby="detailTitle">' +
       '<div class="detail-mask" data-close></div>' +
       '<div class="detail-panel">' +
-        '<button class="detail-close" data-close aria-label="关闭">✕</button>' +
+        '<button class="detail-close" data-close aria-label="关闭"><svg class="ic" aria-hidden="true"><use href="#i-close"/></svg></button>' +
         '<div class="detail-body" id="detailBody"></div>' +
         '<div class="book-bar">' +
-          '<button class="fav-btn" id="favBtn" aria-label="收藏此目的地" aria-pressed="false">♡</button>' +
+          '<button class="fav-btn" id="favBtn" aria-label="收藏此目的地" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#i-heart"/></svg></button>' +
           '<div class="book-price"><b id="bookPrice">—</b><i id="bookPriceNote">价格以到店为准</i></div>' +
           '<button class="btn-cta book-btn" data-book>立即预订</button>' +
           '<button class="btn-ghost book-btn" data-consult>咨询</button>' +
@@ -51,7 +51,7 @@
     '</div>'));
 
   /* ---------- 回到顶部 ---------- */
-  document.body.appendChild(el('<button id="topBtn" aria-label="回到顶部" hidden>↑</button>'));
+  document.body.appendChild(el('<button id="topBtn" aria-label="回到顶部" hidden><svg class="ic" aria-hidden="true"><use href="#i-up"/></svg></button>'));
 
   /* ---------- 全站命名空间 ---------- */
   window.KL = {

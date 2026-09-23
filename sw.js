@@ -6,10 +6,10 @@
  * v6 变更：标题字体改为自托管子集，纳入预缓存清单。
  * v7 变更：顶栏/底部 Tab 改为 HTML 静态标记（不再由 defer 脚本注入），HTML 与
  *          layout.js、style.css 全部更新，必须升版本让老缓存失效。
- * v10 变更：顶栏搜索区高度压缩、Toast 改为 transform/opacity 过渡、横滑吸附对齐、
- *          禁止手势缩放，style.css + app.js + 6 个 HTML 均有改动。
+ * v11 变更：搜索框改为吸顶（顶栏负 top 偏移）、我的页重构、全站 emoji 换手绘 SVG
+ *           图标（新增 body 内联雪碧图），style.css + 3 个 JS + 6 个 HTML 均有改动。
  */
-var CACHE = "kaili-trip-v10";
+var CACHE = "kaili-trip-v12";
 var SHELL = [
   "./",
   "index.html",

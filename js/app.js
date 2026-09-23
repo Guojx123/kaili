@@ -388,7 +388,7 @@
     detailBody.innerHTML =
       head +
       "<h2 id='detailTitle'>" + d.title + "</h2>" +
-      "<span class='d-tag'>📍 " + d.tag + "</span>" +
+      "<span class='d-tag'><svg class='ic' aria-hidden='true'><use href='#i-locate'/></svg> " + d.tag + "</span>" +
       "<p>" + d.desc + "</p>" +
       "<ul>" + d.tips.map(function (t) { return "<li>" + t + "</li>"; }).join("") + "</ul>";
     if (bookPrice) bookPrice.textContent = d.price || "—";
@@ -486,7 +486,8 @@
   function syncFavBtn() {
     if (!favBtn) return;
     var on = currentDetail && !!favState[currentDetail];
-    favBtn.textContent = on ? "❤" : "♡";
+    // 心形是描边图标，实心与否交给 CSS 的 .on .ic{fill:currentColor}，
+    // 不再换成「♡/❤」字符——字符图标会随字体 fallback 变形、粗细也不受控。
     favBtn.classList.toggle("on", !!on);
     favBtn.setAttribute("aria-pressed", on ? "true" : "false");
   }
@@ -508,19 +509,34 @@
   function favKeys() {
     return Object.keys(favState).filter(function (k) { return favState[k] && DETAILS[k]; });
   }
+
+  /* 收藏列表缩略图用的小图标：data.js 的 icon（大插画）→ 24×24 线性小图标。
+     56px 的方块里放大插画会糊，这里换成同语义的小图标，视觉与列表其它图标一致。 */
+  var SMALL_ICON = {
+    noodle: "i-noodle", "soup-pot": "i-bowl", rice: "i-rice", grill: "i-skewer",
+    chili: "i-chili", drypot: "i-bowl", bun: "i-dumpling", tofu: "i-tofu",
+    drink: "i-drink", cake: "i-rice", coldnoodle: "i-noodle", stirfry: "i-bowl",
+    hotel: "i-hotel", list: "i-note", song: "i-music"
+  };
+  function favIconFor(k, d) {
+    if (SMALL_ICON[d.icon]) return SMALL_ICON[d.icon];
+    if (k.indexOf("f-") === 0) return "i-bowl";      // 美食
+    if (k.indexOf("n-") === 0) return "i-note";      // 游记
+    return "i-locate";                               // 目的地兜底
+  }
   function renderFavList() {
     if (!favList) return;
     var keys = favKeys();
     if (!keys.length) {
-      favList.innerHTML = "<p class='fav-empty'>还没有收藏。在目的地 / 美食 / 文化卡片里点开详情，按底部的 ♡ 就能收进来。</p>";
+      favList.innerHTML = "<p class='fav-empty'>还没有收藏。在目的地 / 美食 / 文化卡片里点开详情，按底部的心形就能收进来。</p>";
     } else {
       favList.innerHTML = keys.map(function (k) {
         var d = DETAILS[k];
         var face = d.img ? "<img src='" + d.img.replace("-800.webp", "-400.webp") + "' alt='' loading='lazy' decoding='async'>"
-                         : "<span class='fav-face' aria-hidden='true'>" + (d.emoji || "📍") + "</span>";
+                         : "<span class='fav-face' aria-hidden='true'><svg class='ic'><use href='#" + favIconFor(k, d) + "'/></svg></span>";
         return "<div class='fav-row' data-detail='" + k + "'>" + face +
                "<div><b>" + d.title + "</b><i>" + (d.tag || "") + " · " + (d.price || "") + "</i></div>" +
-               "<span class='fav-go' aria-hidden='true'>›</span></div>";
+               "<svg class='ic fav-go' aria-hidden='true'><use href='#i-chevron'/></svg></div>";
       }).join("");
       // 与详情页卡片一致：非原生元素补 role/tabindex，键盘才 Tab 得到
       $$(".fav-row", favList).forEach(function (el) {
@@ -599,24 +615,35 @@
   }
   var mePack = $("#mePack");
   if (mePack) mePack.addEventListener("click", function () { location.href = KL.href("pack"); });
+
+  /* 我的页「打包清单」一栏显示已勾选项数（清单只在行程页，这里是从 localStorage 读的） */
+  var packProgress = $("#packProgress");
+  function syncPackProgress() {
+    if (!packProgress) return;
+    var n = Object.keys(packState).filter(function (k) { return packState[k]; }).length;
+    packProgress.textContent = n ? "已勾选 " + n + " 项" : "未勾选";
+  }
+  syncPackProgress();
+
   var meClear = $("#meClear");
   if (meClear) {
     meClear.addEventListener("click", function () {
       packState = {}; savePack(packState);
       $$("#packList li").forEach(function (li) { markLi(li, false); });
+      syncPackProgress();
       toast("清单勾选已重置");
     });
   }
 
   /* ---------- PWA：注册 Service Worker + 离线下载 ---------- */
   var OFF_KEY = "kaili-offline-ok";
-  var CACHE_NAME = "kaili-trip-v10";   // 必须与 sw.js 的 CACHE 一致，否则离线缓存会被 SW 激活时清理掉
+  var CACHE_NAME = "kaili-trip-v12";   // 必须与 sw.js 的 CACHE 一致，否则离线缓存会被 SW 激活时清理掉
   var PAGES = ["index.html", "explore.html", "trip.html", "pack.html", "me.html", "food.html"];
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").then(function () {
       if (localStorage.getItem(OFF_KEY) === "1") {
         var os = $("#offlineState");
-        if (os) os.textContent = "已就绪 ✓";
+        if (os) os.textContent = "已就绪";
       }
     }).catch(function () {});
   }
@@ -645,8 +672,8 @@
     }).then(function () {
       localStorage.setItem(OFF_KEY, "1");
       var os = $("#offlineState");
-      if (os) os.textContent = "已就绪 ✓";
-      toast("✅ 行程已缓存，离线也能看");
+      if (os) os.textContent = "已就绪";
+      toast("行程已缓存，离线也能看");
     }).catch(function () { toast("部分资源缓存失败，请检查网络"); });
   }
   var dlBtn = $("#dlBtn");
@@ -656,17 +683,20 @@
 
   /* ---------- 出发倒计时（首页 Banner） ---------- */
   (function countdown() {
-    var el = $("#cdText");
-    if (!el) return;
+    var el = $("#cdText");                 // 首页 Banner 的胶囊，写完整句
+    var shorts = $$("[data-countdown]");   // 我的页行程卡，只写数字（下面还有「距出发」标签）
+    if (!el && !shorts.length) return;
     var dep = new Date(2026, 8, 24); // 2026-09-24 出发
     var today = new Date();
     today = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     var d = Math.round((dep - today) / 86400000);
-    if (d > 1) el.textContent = "距出发 " + d + " 天";
-    else if (d === 1) el.textContent = "明天出发 🎑";
-    else if (d === 0) el.textContent = "今天出发 🎑";
-    else if (d >= -3) el.textContent = "行程进行中 · Day " + (1 - d);
-    else el.textContent = "旅程圆满 · 载梦而归";
+    var short;
+    if (d > 1) { if (el) el.textContent = "距出发 " + d + " 天"; short = d + " 天"; }
+    else if (d === 1) { if (el) el.textContent = "明天出发"; short = "明天"; }
+    else if (d === 0) { if (el) el.textContent = "今天出发"; short = "今天"; }
+    else if (d >= -3) { if (el) el.textContent = "行程进行中 · Day " + (1 - d); short = "Day " + (1 - d); }
+    else { if (el) el.textContent = "旅程圆满 · 载梦而归"; short = "已结束"; }
+    shorts.forEach(function (s) { s.textContent = short; });
   })();
 
   /* ---------- PWA 安装引导（我的页） ---------- */
@@ -679,7 +709,7 @@
   });
   window.addEventListener("appinstalled", function () {
     var s = $("#installState");
-    if (s) s.textContent = "已安装 ✓";
+    if (s) s.textContent = "已安装";
     deferredPrompt = null;
   });
   if (installBtn) {
@@ -712,9 +742,9 @@
 
   /* ---------- 断网提示 ---------- */
   window.addEventListener("offline", function () {
-    toast("📴 网络已断开，已缓存行程仍可离线查看");
+    toast("网络已断开，已缓存的行程仍可离线查看");
   });
   window.addEventListener("online", function () {
-    toast("📶 网络已恢复");
+    toast("网络已恢复");
   });
 })();
