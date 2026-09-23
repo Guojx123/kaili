@@ -1,11 +1,11 @@
 /* Service Worker：凯里行 PWA 离线支持 */
-var CACHE = "kaili-trip-v2";
+var CACHE = "kaili-trip-v4";
 var SHELL = [
   "./",
   "index.html",
   "explore.html",
   "trip.html",
-  "culture.html",
+  "pack.html",
   "me.html",
   "food.html",
   "css/style.css",

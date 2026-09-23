@@ -64,7 +64,7 @@
         return;
       }
       var kwLower = kw.toLowerCase();
-      var selectors = [".dest-card", ".craft-card", ".food-item", ".route-card", ".note-card", ".ex-card"];
+      var selectors = [".dest-card", ".craft-card", ".food-item", ".route-card", ".note-card", ".ex-card", ".cul-card"];
       selectors.forEach(function (sel) {
         $$(sel).forEach(function (card) {
           var text = (card.textContent + " " + (card.dataset.keywords || "")).toLowerCase();
@@ -72,7 +72,7 @@
         });
       });
       [[".hscroll", ".dest-card"], [".craft-grid", ".craft-card"], [".food-list", ".food-item"],
-       [".route-grid", ".route-card"], [".note-list", ".note-card"], ["#exploreGrid", ".ex-card"]]
+       [".route-grid", ".route-card"], [".note-list", ".note-card"], [".cul-list", ".cul-card"], ["#exploreGrid", ".ex-card"]]
         .forEach(function (pair) {
           var wrap = $(pair[0]);
           if (!wrap) return;
@@ -226,11 +226,12 @@
         savePack(packState);
       });
     });
-    $("#packToggle").addEventListener("click", togglePack);
+    var pt = $("#packToggle");
+    if (pt) pt.addEventListener("click", togglePack);
     if (location.hash === "#pack") { packList.hidden = false; }
   }
   var mePack = $("#mePack");
-  if (mePack) mePack.addEventListener("click", function () { location.href = KL.href("trip") + "#pack"; });
+  if (mePack) mePack.addEventListener("click", function () { location.href = KL.href("pack"); });
   var meClear = $("#meClear");
   if (meClear) {
     meClear.addEventListener("click", function () {
@@ -242,7 +243,7 @@
 
   /* ---------- PWA：注册 Service Worker + 离线下载 ---------- */
   var OFF_KEY = "kaili-offline-ok";
-  var PAGES = ["index.html", "explore.html", "trip.html", "culture.html", "me.html", "food.html"];
+  var PAGES = ["index.html", "explore.html", "trip.html", "pack.html", "me.html", "food.html"];
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").then(function () {
       if (localStorage.getItem(OFF_KEY) === "1") {
