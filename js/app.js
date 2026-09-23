@@ -216,7 +216,9 @@
   }
   if (packList) {
     $$("#packList li").forEach(function (li, i) {
-      var key = li.parentElement.querySelector("h3").textContent + "::" + i;
+      var card = li.closest(".pack-card");
+      var head = card ? card.querySelector("h3") : null;
+      var key = (head ? head.textContent : "card") + "::" + i;
       if (packState[key]) li.classList.add("done");
       li.addEventListener("click", function () {
         li.classList.toggle("done");
@@ -258,7 +260,7 @@
     ["xijiang", "xiasi", "langde", "wudong", "qingyun", "xiulitao",
      "craft-miaoxiu", "craft-yinshi", "craft-ran", "village-cunt", "food-suantang", "moon"]
       .forEach(function (n) { urls.push("assets/img/" + n + "-400.webp", "assets/img/" + n + "-800.webp"); });
-    caches.open("kaili-trip-v2").then(function (c) {
+    caches.open("kaili-trip-v3").then(function (c) {
       return c.addAll(urls);
     }).then(function () {
       localStorage.setItem(OFF_KEY, "1");

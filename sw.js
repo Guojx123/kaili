@@ -51,7 +51,24 @@ self.addEventListener("fetch", function (e) {
     return;
   }
 
-  // 静态资源（图片/CSS/JS/字体）：缓存优先
+  // 同源 JS/CSS/manifest：网络优先（保证部署后立刻生效），失败回退缓存
+  if (req.url.indexOf(self.location.origin) === 0 &&
+      /\.(js|css|webmanifest|json)(\?|$)/.test(req.url)) {
+    e.respondWith(
+      fetch(req).then(function (res) {
+        if (res.ok) {
+          var copy = res.clone();
+          caches.open(CACHE).then(function (c) { c.put(req, copy); });
+        }
+        return res;
+      }).catch(function () {
+        return caches.match(req);
+      })
+    );
+    return;
+  }
+
+  // 图片/字体等：缓存优先
   e.respondWith(
     caches.match(req).then(function (cached) {
       if (cached) return cached;
