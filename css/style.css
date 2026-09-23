@@ -41,6 +41,9 @@ html {
   /* 去掉浏览器默认的点击高亮：点底部 Tab / 卡片时会闪一层灰蓝色，很像"页面闪了一下"。
      移除后由下方「点击反馈」小节提供受控的反馈，触感不丢。 */
   -webkit-tap-highlight-color: transparent;
+  /* 禁掉双击缩放（保留单指拖动滚动与双指缩放能力由 viewport 元标签统一关闭）。
+     双击缩放会带来 ~300ms 点击延迟，也会让固定定位的顶栏/底栏跟着缩放跳动。 */
+  touch-action: manipulation;
 }
 body {
   font-family: var(--font-body);
@@ -84,7 +87,9 @@ h1, h2, h3 { font-family: var(--font-title); }
   position: sticky; top: 0; z-index: 50;
   background: linear-gradient(180deg, var(--indigo) 0%, #24496F 100%);
   color: #fff;
-  padding: calc(8px + env(safe-area-inset-top)) var(--pad) 10px;
+  /* 顶栏是吸顶的，高度直接吃掉可视区：44+40+36 + 间距/内边距 ≈ 148px 已是上限。
+     曾经是 166px（搜索框与热词都是 44px 满高），占掉 390×844 机型的 20% 屏幕。 */
+  padding: calc(6px + env(safe-area-inset-top)) var(--pad) 8px;
   box-shadow: 0 2px 10px rgba(27,58,92,.25);
 }
 .topbar-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
@@ -94,29 +99,35 @@ h1, h2, h3 { font-family: var(--font-title); }
 }
 .topbar-title { font-family: var(--font-title); font-size: 15px; letter-spacing: 1px; color: #fff; opacity: .9; }
 .search-wrap {
-  margin-top: 8px; display: flex; align-items: center; gap: 8px;
-  background: #fff; border-radius: 22px; padding: 0 14px; height: 44px;
+  margin-top: 6px; display: flex; align-items: center; gap: 8px;
+  background: #fff; border-radius: 20px; padding: 0 12px; height: 40px;
 }
 .search-ico { color: var(--ink-2); flex: none; }
 #searchInput {
-  flex: 1; border: 0; outline: none; font-size: 16px; min-height: 44px;
+  flex: 1; border: 0; outline: none; font-size: 16px; min-height: 40px;
   background: transparent; color: var(--ink);
 }
-.search-clear { color: var(--ink-2); width: 44px; }
-.hot-chips { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; scrollbar-width: none; }
+/* 隐藏 WebKit 原生的搜索清除按钮：它跟右侧自定义的 search-clear 会同时出现，
+   一输入就有两个叉并排。input[type=search] 的取消按钮只在这里关得掉。 */
+#searchInput::-webkit-search-cancel-button,
+#searchInput::-webkit-search-decoration {
+  -webkit-appearance: none; appearance: none; display: none;
+}
+.search-clear { color: var(--ink-2); width: 40px; min-height: 40px; }
+.hot-chips { display: flex; gap: 8px; margin-top: 6px; overflow-x: auto; scrollbar-width: none; }
 .hot-chips::-webkit-scrollbar { display: none; }
 /* 热词样式同时覆盖 <button> 和 <a class="chip-link">：
    壳是静态生成的热词一律是 <a>（可右键/新标签打开），早先只写了 button 选择器，
    导致热词一直以裸链接呈现、没有胶囊边框。
-   高度直接给到 44px 与上方搜索框齐平：试过用 ::after 撑热区保留 32px 视觉，
-   但 .hot-chips 是 overflow-x:auto（overflow-y 被连带算成 auto），伪元素溢出部分会被裁掉，
-   实测上下各扩 6px 只剩 4px，凑不满 44 —— 所以不玩伪元素，老老实实给足高度。 */
+   高度 36px：顶栏吸顶，三个 44px 满高元素叠起来太高，按需求压到 36；
+   试过用 ::after 撑热区保留视觉高度，但 .hot-chips 是 overflow-x:auto
+   （overflow-y 被连带算成 auto），伪元素溢出部分会被裁掉，实测上下各扩 6px 只剩 4px —— 不玩伪元素。 */
 .hot-chips button,
 .hot-chips .chip-link {
-  flex: none; min-height: 44px; padding: 0 14px;
+  flex: none; min-height: 36px; padding: 0 12px;
   display: inline-flex; align-items: center; justify-content: center;
-  border: 1px solid rgba(255,255,255,.35); border-radius: 22px;
-  color: #fff; font-size: 13px;
+  border: 1px solid rgba(255,255,255,.35); border-radius: 18px;
+  color: #fff; font-size: 12.5px;
 }
 .hot-chips button:active,
 .hot-chips .chip-link:active { background: rgba(255,255,255,.18); }
@@ -172,12 +183,21 @@ h1, h2, h3 { font-family: var(--font-title); }
 }
 .sec-sub, .sec-link { font-size: 13px; color: var(--ink-2); min-height: 44px; display: inline-flex; align-items: center; }
 .sec-link { color: var(--teal); font-weight: 500; }
+/* 区块末尾的「看更多」一行（游记 → 完整行程），右对齐跟 sec-head 的链接呼应 */
+.sec-more { margin-top: 12px; display: flex; justify-content: flex-end; }
 
 /* ===== 目的地横滑卡片 ===== */
+/* 负外边距 + 等量左内边距，让卡片能贴着屏幕边滑出、静止时又与其它内容左对齐。
+   关键在 scroll-padding-left：scroll-snap-type: x mandatory 的对齐基准是
+   "滚动视口 - scroll-padding"，而内边距本身在滚动视口之内 —— 不加这一行，
+   浏览器为了让第一张卡对齐到屏幕 x=0，启动时就会把容器左滑 16px，
+   于是首屏第一张卡死死贴着屏幕左边（实测 getBoundingClientRect().x === 0）。
+   补上之后吸附位置落在左内边距内侧，卡片与「目的地」标题同一条竖线。 */
 .hscroll {
   display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px;
   scroll-snap-type: x mandatory; scrollbar-width: none;
   margin: 0 calc(-1 * var(--pad)); padding-left: var(--pad); padding-right: var(--pad);
+  scroll-padding-left: var(--pad);
 }
 .hscroll::-webkit-scrollbar { display: none; }
 .dest-card {
@@ -253,10 +273,17 @@ h1, h2, h3 { font-family: var(--font-title); }
 }
 .consult h3 { font-size: 17px; }
 .consult p { font-size: 12px; color: var(--silver); }
+/* 「免费咨询」四个字用 .btn-cta 的 15px 太重，把整条 CTA 压得比左边的文案还抢眼。
+   单独降到 13px 并收窄左右内边距（高度不动，仍是 44px 触控目标）。 */
+.consult .btn-cta { font-size: 13px; padding: 0 16px; }
 
-/* ===== 按钮 ===== */
+/* ===== 按钮 =====
+   两个硬约束：① 文字必须显式居中（<button> UA 默认 center，<a> 继承左对齐）；
+   ② 必须 nowrap —— 按钮常作为 flex 子项（如 .consult 里），默认允许收缩到
+   最窄词宽，字号一小就会被挤成两行（「免费咨询」曾裂成「免费咨 / 询」）。 */
 .btn-cta {
   display: inline-flex; align-items: center; justify-content: center; text-align: center;
+  white-space: nowrap;
   background: var(--cta); color: #fff; border-radius: 22px;
   padding: 0 20px; min-height: 44px; font-size: 15px; font-weight: 600;
   box-shadow: 0 3px 10px rgba(217,79,48,.35);
@@ -266,6 +293,7 @@ h1, h2, h3 { font-family: var(--font-title); }
    同一个 .btn-ghost 用在 <button id="dlBtn"> 与 <a href="pack.html"> 上时文字位置不一致。 */
 .btn-ghost {
   display: inline-flex; align-items: center; justify-content: center; text-align: center;
+  white-space: nowrap;
   border: 1px solid var(--teal); color: var(--teal); border-radius: 22px;
   padding: 0 16px; min-height: 44px; font-size: 14px;
   background: rgba(15,118,110,.05);
@@ -452,14 +480,26 @@ h1, h2, h3 { font-family: var(--font-title); }
 .book-price i { font-style: normal; font-size: 12px; color: var(--ink-2); display: block; }
 .book-btn { flex: none; }
 
-/* ===== Toast ===== */
+/* ===== Toast =====
+   原先直接复用详情浮层的 slideUp：它的 from 是 transform: translateY(40px)、to 是 transform: none。
+   而 Toast 靠 translateX(-50%) 居中，动画一跑就把这个 X 位移整个覆盖掉 ——
+   于是每次弹出都先"甩"到屏幕中偏左，再硬跳回中间，看着就是卡顿/错位两下。
+   现在改成独立的 transform + opacity 过渡，-50% 常驻，只动 Y 与透明度；
+   两者都是合成器属性，不触发重排重绘，动画期间也不掉帧。 */
 .toast {
   position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom));
-  transform: translateX(-50%); z-index: 99;
+  z-index: 99;
+  max-width: min(520px, calc(100vw - 32px));
   background: rgba(27,58,92,.92); color: #fff;
-  padding: 10px 18px; border-radius: 20px; font-size: 14px;
-  animation: slideUp .2s ease;
+  padding: 10px 18px; border-radius: 20px; font-size: 14px; line-height: 1.5;
+  text-align: center;
+  transform: translate3d(-50%, 10px, 0);
+  opacity: 0;
+  pointer-events: none;            /* 淡出期间也不能挡住下面的按钮 */
+  will-change: transform, opacity;
+  transition: transform .22s cubic-bezier(.22,.9,.24,1), opacity .18s ease;
 }
+.toast.show { transform: translate3d(-50%, 0, 0); opacity: 1; }
 
 /* ===== 底部 Tab ===== */
 .tabbar {

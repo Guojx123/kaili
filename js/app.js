@@ -10,16 +10,39 @@
   var KL = window.KL || { href: function (id) { return "index.html"; } };
   var DETAILS = window.KL_DETAILS || {};
 
-  /* ---------- Toast ---------- */
-  var toastEl = $("#toast"), toastTimer;
+  /* ---------- Toast ----------
+   * 显隐靠 .show 类驱动 transform/opacity 过渡（见 style.css），不再用 hidden 直接切。
+   * 连续触发时只重置计时器、不重放入场动画（否则会看到反复回弹）；只有从隐藏变可见
+   * 的那一次才需要先脱离 display:none —— 读一次布局属性强制提交样式，过渡才不会被吞掉。 */
+  var toastEl = $("#toast"), toastTimer, toastHideTimer;
+  var TOAST_MS = 2200, TOAST_OUT_MS = 220;
   function toast(msg) {
     if (!toastEl) return;
-    toastEl.textContent = msg;
-    toastEl.hidden = false;
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { toastEl.hidden = true; }, 2200);
+    clearTimeout(toastHideTimer);
+    toastEl.textContent = msg;
+    if (toastEl.hidden) {
+      toastEl.hidden = false;
+      void toastEl.offsetHeight;          // 提交 display 变更，让下面加的 .show 真正产生过渡
+    }
+    toastEl.classList.add("show");
+    toastTimer = setTimeout(function () {
+      toastEl.classList.remove("show");
+      toastHideTimer = setTimeout(function () { toastEl.hidden = true; }, TOAST_OUT_MS);
+    }, TOAST_MS);
   }
   window.KLToast = toast;
+
+  /* ---------- 禁止手势缩放 ----------
+   * 各页 <meta viewport> 已写 maximum-scale=1.0, user-scalable=no，
+   * 但 iOS Safari 从 iOS 10 起会为无障碍忽略它，双指捏合仍然放大；这里再拦一道。
+   * 只拦 gesture*（Safari 专用）与多指 touchmove，单指滚动不受影响。 */
+  ["gesturestart", "gesturechange", "gestureend"].forEach(function (t) {
+    document.addEventListener(t, function (e) { e.preventDefault(); }, { passive: false });
+  });
+  document.addEventListener("touchmove", function (e) {
+    if (e.touches && e.touches.length > 1) e.preventDefault();
+  }, { passive: false });
 
   /* 两地距离（km）：平面近似，够用且不引入任何外部依赖 */
   function kmBetween(lat1, lon1, lat2, lon2) {
@@ -110,6 +133,10 @@
           wrap.classList.toggle("hide-by-search", !any);
           var head = wrap.previousElementSibling;
           if (head && head.classList.contains("sec-head")) head.classList.toggle("hide-by-search", !any);
+          // 区块末尾的「看更多」行（游记 → 完整行程）也要跟着走，
+          // 否则搜索结果里会孤零零剩一行指向别的页面的链接
+          var more = wrap.nextElementSibling;
+          if (more && more.classList.contains("sec-more")) more.classList.toggle("hide-by-search", !any);
         });
       });
     }
@@ -583,7 +610,7 @@
 
   /* ---------- PWA：注册 Service Worker + 离线下载 ---------- */
   var OFF_KEY = "kaili-offline-ok";
-  var CACHE_NAME = "kaili-trip-v9";   // 必须与 sw.js 的 CACHE 一致，否则离线缓存会被 SW 激活时清理掉
+  var CACHE_NAME = "kaili-trip-v10";   // 必须与 sw.js 的 CACHE 一致，否则离线缓存会被 SW 激活时清理掉
   var PAGES = ["index.html", "explore.html", "trip.html", "pack.html", "me.html", "food.html"];
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").then(function () {
