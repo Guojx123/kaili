@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1B3A5C">
+<meta name="description" content="我的行程工具箱：打包清单、离线下载、收藏、行程总览、苗侗文化、向导咨询。">
+<title>我的 | 中秋贵州·凯里行</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="me">
+
+<main id="app">
+<section class="view" data-view="me">
+  <div class="sec-head"><h2>我的</h2><span class="sec-sub">行程工具箱</span></div>
+  <div class="me-card">
+    <div class="me-avatar">凯</div>
+    <div><b>中秋凯里 4 日行</b><i>2026.9.24 – 9.27 · 2 人 · 自驾</i></div>
+  </div>
+  <div class="me-grid">
+    <button class="me-item" id="meFav">❤️ 我的收藏<span id="favCount">0 个</span></button>
+    <button class="me-item" id="meInstall">⬇️ 安装应用<span id="installState">添加到主屏幕</span></button>
+    <button class="me-item" id="mePack">🧳 打包清单<span>7 类 · 可勾选</span></button>
+    <button class="me-item" id="meOffline">📥 离线行程<span id="offlineState">未下载</span></button>
+    <button class="me-item" data-goto="trip">🗺️ 行程总览<span>Day 1–4</span></button>
+    <button class="me-item" data-goto="culture">🏮 苗侗文化<span>6 篇速读</span></button>
+    <button class="me-item" id="meClear">🗑️ 清除勾选<span>重置清单</span></button>
+    <button class="me-item" data-consult>💬 联系向导<span>行程咨询</span></button>
+  </div>
+  <p class="me-tip">💡 首次打开时可"添加到主屏幕"，即可离线查看完整行程与打包清单。</p>
+</section>
+</main>
+
+<script src="js/data.js" defer></script>
+<script src="js/layout.js" defer></script>
+<script src="js/app.js" defer></script>
+</body>
+</html>

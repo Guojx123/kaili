@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1B3A5C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="中秋贵州·凯里行——苗侗明珠、山水凯里：4 日行程记录与实用攻略，含西江千户苗寨、郎德上寨、下司古镇、酸汤鱼与苗绣非遗体验。">
+<title>首页 | 中秋贵州·凯里行</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="home">
+
+<main id="app">
+<section class="view" data-view="home">
+
+  <!-- Banner -->
+  <div class="banner">
+    <img src="assets/img/banner-kaili-800.webp"
+         srcset="assets/img/banner-kaili-400.webp 400w, assets/img/banner-kaili-800.webp 800w"
+         sizes="(max-width:640px) 100vw, 720px"
+         width="800" height="600" fetchpriority="high" decoding="async"
+         alt="山水凯里 Banner：苗绣纹样与层叠山影">
+    <div class="banner-text">
+      <p class="banner-meta"><span class="banner-tag">2026 中秋 · 4 天 3 晚</span><span class="cd-chip" id="cdText">中秋倒计时</span></p>
+      <h1>中秋贵州 · 凯里行</h1>
+      <p class="banner-sub">逛苗寨、喝拦门酒、吃酸汤鱼，赴一场苗侗山水之约</p>
+    </div>
+  </div>
+
+  <!-- 天气 + 节庆条 -->
+  <div class="wx-fest" aria-label="天气与节庆信息">
+    <div class="wx-item">
+      <span class="wx-ico">⛅</span>
+      <div><b>19~27℃</b><i>多云转晴 · 适合出行</i></div>
+    </div>
+    <div class="wx-item">
+      <span class="wx-ico">🌕</span>
+      <div><b>中秋赏月</b><i>西江观景台视野最佳</i></div>
+    </div>
+    <div class="wx-item">
+      <span class="wx-ico">🎶</span>
+      <div><b>芦笙正欢</b><i>苗寨迎客 · 拦门酒开坛</i></div>
+    </div>
+  </div>
+
+  <!-- 目的地横滑卡片 -->
+  <div class="sec-head">
+    <h2>目的地</h2><span class="sec-sub">横滑查看更多 →</span>
+  </div>
+  <div class="hscroll" data-hscroll>
+    <a class="dest-card" href="#/xijiang" data-detail="xijiang" data-keywords="西江千户苗寨 雷山 观景台 苗寨">
+      <img src="assets/img/xijiang-400.webp" srcset="assets/img/xijiang-400.webp 400w, assets/img/xijiang-800.webp 800w" sizes="(max-width:640px) 62vw, 300px" loading="lazy" decoding="async" width="400" height="300" alt="西江千户苗寨夜景">
+      <span class="dest-badge">雷山县 · 凯里出发约 1 小时</span>
+      <h3>西江千户苗寨</h3><p>万家灯火 · 东引观景台</p>
+    </a>
+    <a class="dest-card" href="#/langde" data-detail="langde" data-keywords="郎德上寨 拦门酒 苗寨 奥运圣火">
+      <img src="assets/img/langde-400.webp" srcset="assets/img/langde-400.webp 400w, assets/img/langde-800.webp 800w" sizes="(max-width:640px) 62vw, 300px" loading="lazy" decoding="async" width="400" height="300" alt="郎德上寨拦门酒">
+      <span class="dest-badge">凯里市郊 · 车程约 40 分钟</span>
+      <h3>郎德上寨</h3><p>拦门酒十二道 · 原生态苗寨</p>
+    </a>
+    <a class="dest-card" href="#/xiasi" data-detail="xiasi" data-keywords="下司古镇 清江 牌坊 犬">
+      <img src="assets/img/xiasi-400.webp" srcset="assets/img/xiasi-400.webp 400w, assets/img/xiasi-800.webp 800w" sizes="(max-width:640px) 62vw, 300px" loading="lazy" decoding="async" width="400" height="300" alt="下司古镇">
+      <span class="dest-badge">凯里西 · 车程约 30 分钟</span>
+      <h3>下司古镇</h3><p>清水江畔 · 阳明书院</p>
+    </a>
+    <a class="dest-card" href="#/wudong" data-detail="wudong" data-keywords="乌东苗寨 白岩村 云海 徒步">
+      <img src="assets/img/wudong-400.webp" srcset="assets/img/wudong-400.webp 400w, assets/img/wudong-800.webp 800w" sizes="(max-width:640px) 62vw, 300px" loading="lazy" decoding="async" width="400" height="300" alt="乌东苗寨与白岩村">
+      <span class="dest-badge">雷山县 · 小众秘境</span>
+      <h3>白岩村 · 乌东苗寨</h3><p>云海梯田 · 静谧村落</p>
+    </a>
+    <a class="dest-card" href="#/qingyun" data-detail="qingyun" data-keywords="青云市集 贵阳 夜市 小吃">
+      <img src="assets/img/qingyun-400.webp" srcset="assets/img/qingyun-400.webp 400w, assets/img/qingyun-800.webp 800w" sizes="(max-width:640px) 62vw, 300px" loading="lazy" decoding="async" width="400" height="300" alt="贵阳青云市集">
+      <span class="dest-badge">贵阳 · 夜生活地标</span>
+      <h3>青云市集</h3><p>老厂区改造 · 烟火气拉满</p>
+    </a>
+  </div>
+
+  <!-- 主题路线 -->
+  <div class="sec-head"><h2>主题路线</h2><a class="sec-link" href="trip.html" data-goto="trip">看完整行程</a></div>
+  <div class="route-grid">
+    <button class="route-card" data-goto="trip">
+      <span class="route-num r1">01</span>
+      <h3>山水初见 · 贵阳半日</h3>
+      <p>龙洞堡落地 → 省府北路/电台街/民生路 Citywalk → 青云市集夜宵</p>
+    </button>
+    <button class="route-card" data-goto="trip">
+      <span class="route-num r2">02</span>
+      <h3>高铁南下 · 苗侗初体验</h3>
+      <p>贵阳北→凯里南 35 分钟 → 绣里淘集市 → 抱朴咖啡 → 村T演出</p>
+    </button>
+    <button class="route-card" data-goto="trip">
+      <span class="route-num r3">03</span>
+      <h3>苗寨深度 · 全天巡礼</h3>
+      <p>郎德上寨拦门酒 → 白岩村/乌东苗寨 → 西江千户苗寨夜景</p>
+    </button>
+    <button class="route-card" data-goto="trip">
+      <span class="route-num r4">04</span>
+      <h3>从容返程 · 带货回家</h3>
+      <p>苗寨晨雾 → 凯里南→贵阳北 → 高铁返程</p>
+    </button>
+  </div>
+
+  <!-- 非遗体验 -->
+  <div class="sec-head"><h2>非遗体验</h2><a class="sec-link" href="culture.html" data-goto="culture">更多苗侗文化</a></div>
+  <div class="craft-grid">
+    <a class="craft-card" href="#/miaoxiu" data-detail="miaoxiu" data-keywords="苗绣 绣里淘 非遗 刺绣">
+      <img src="assets/img/craft-miaoxiu-400.webp" srcset="assets/img/craft-miaoxiu-400.webp 400w, assets/img/craft-miaoxiu-800.webp 800w" sizes="(max-width:640px) 45vw, 220px" loading="lazy" decoding="async" width="400" height="300" alt="苗绣">
+      <h3>苗绣</h3><p>指尖上的史书 · 绣里淘淘货</p>
+    </a>
+    <a class="craft-card" href="#/yinshi" data-detail="yinshi" data-keywords="银饰 银匠 控拜 苗银">
+      <img src="assets/img/craft-yinshi-400.webp" srcset="assets/img/craft-yinshi-400.webp 400w, assets/img/craft-yinshi-800.webp 800w" sizes="(max-width:640px) 45vw, 220px" loading="lazy" decoding="async" width="400" height="300" alt="苗族银饰">
+      <h3>苗银锻制</h3><p>千锤百炼 · 一身银装走苗乡</p>
+    </a>
+    <a class="craft-card" href="#/cunt" data-detail="cunt" data-keywords="村T 侗族 服饰 T台">
+      <img src="assets/img/village-cunt-400.webp" srcset="assets/img/village-cunt-400.webp 400w, assets/img/village-cunt-800.webp 800w" sizes="(max-width:640px) 45vw, 220px" loading="lazy" decoding="async" width="400" height="300" alt="村T演出">
+      <h3>村T</h3><p>乡土T台秀 · 全民走秀现场</p>
+    </a>
+    <a class="craft-card" href="#/ran" data-detail="ran" data-keywords="蜡染 蓝染 靛蓝 手作">
+      <img src="assets/img/craft-ran-400.webp" srcset="assets/img/craft-ran-400.webp 400w, assets/img/craft-ran-800.webp 800w" sizes="(max-width:640px) 45vw, 220px" loading="lazy" decoding="async" width="400" height="300" alt="蜡染蓝布">
+      <h3>蜡染</h3><p>一缸靛蓝 · 染出冰纹山水</p>
+    </a>
+  </div>
+
+  <!-- 美食 -->
+  <div class="sec-head"><h2>美食</h2><span class="sec-sub">酸辣鲜香，凯里的灵魂</span></div>
+  <div class="food-list">
+    <a class="food-item" href="#/suantang" data-detail="suantang" data-keywords="酸汤鱼 酸汤 牛肉 美食">
+      <img src="assets/img/food-suantang-400.webp" srcset="assets/img/food-suantang-400.webp 400w, assets/img/food-suantang-800.webp 800w" sizes="72px" loading="lazy" decoding="async" width="400" height="300" alt="凯里酸汤鱼">
+      <div><h3>凯里红酸汤鱼</h3><p>番茄发酵红酸汤 + 稻花鱼，蘸水才是灵魂</p></div>
+      <span class="food-tag">必吃</span>
+    </a>
+    <div class="food-item">
+      <span class="food-emoji">🍲</span>
+      <div><h3>酸汤牛肉火锅</h3><p>黄牛肉切薄片，酸汤一烫即熟</p></div>
+    </div>
+    <div class="food-item">
+      <span class="food-emoji">🍚</span>
+      <div><h3>糯米饭 · 苗家腊肉</h3><p>早晨来一份糯米饭团，配腊肉酸萝卜</p></div>
+    </div>
+    <div class="food-item">
+      <span class="food-emoji">🍹</span>
+      <div><h3>冰杨梅汤 · 米豆腐</h3><p>解辣神器，走街串巷随手来一杯</p></div>
+    </div>
+  </div>
+
+  <!-- 游记 -->
+  <div class="sec-head"><h2>游记</h2><span class="sec-sub">来自这趟中秋之旅</span></div>
+  <div class="note-list">
+    <article class="note-card">
+      <h3>在中秋夜的西江，看万家灯火亮成星河</h3>
+      <p>东引观景台 19:30 灯全亮，人不算挤，拍照记得带广角……</p>
+      <span class="note-meta">Day 3 · 西江千户苗寨</span>
+    </article>
+    <article class="note-card">
+      <h3>十二道拦门酒，第一道就得回礼</h3>
+      <p>郎德上寨 11 点开寨，牛角杯千万别用手接，不然要喝完……</p>
+      <span class="note-meta">Day 3 · 郎德上寨</span>
+    </article>
+    <article class="note-card">
+      <h3>村T：在凯里看了一场最野的时装秀</h3>
+      <p>没有明星，全是本地叔叔阿姨，氛围比大秀还炸……</p>
+      <span class="note-meta">Day 2 · 凯里</span>
+    </article>
+  </div>
+
+  <!-- 底部咨询 -->
+  <div class="consult">
+    <div>
+      <h3>行程有疑问？</h3>
+      <p>包车 / 拼车 / 苗寨民宿，在线咨询本地向导</p>
+    </div>
+    <button class="btn-cta" data-consult>免费咨询</button>
+  </div>
+</section>
+</main>
+
+<script src="js/data.js" defer></script>
+<script src="js/layout.js" defer></script>
+<script src="js/app.js" defer></script>
+</body>
+</html>

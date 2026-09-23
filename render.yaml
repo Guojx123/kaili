@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: kaili-travel
+    runtime: static
+    buildCommand: echo "静态站点，无需构建"
+    staticPublishPath: .
+    pullRequestPreviewsEnabled: false
+    headers:
+      - pattern: "/sw.js"
+        headers:
+          - key: Cache-Control
+            value: "no-cache"
+      - pattern: "/assets/img/*.webp"
+        headers:
+          - key: Cache-Control
+            value: "public, max-age=31536000, immutable"
+    routes:
+      - type: rewrite
+        source: /
+        destination: /index.html

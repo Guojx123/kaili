@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1B3A5C">
+<meta name="description" content="探索凯里：西江千户苗寨、郎德上寨、下司古镇、酸汤鱼、绣里淘、村T——景点、美食、非遗、住宿分类导航。">
+<title>探索 | 中秋贵州·凯里行</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="explore">
+
+<main id="app">
+<section class="view" data-view="explore">
+  <div class="sec-head"><h2>探索凯里</h2><span class="sec-sub">按分类找玩法</span></div>
+  <div class="explore-tabs" role="tablist">
+    <button class="active" data-cat="all">全部</button>
+    <button data-cat="scenic">景点</button>
+    <button data-cat="food">美食</button>
+    <button data-cat="craft">非遗</button>
+    <button data-cat="stay">住宿</button>
+  </div>
+  <div class="explore-grid" id="exploreGrid">
+    <button class="ex-card" data-cat="scenic" data-detail="xijiang"><b>西江千户苗寨</b><i>雷山县 · 凯里出发约 1 小时</i><p>全球最大苗寨，夜景封神，中秋夜观景台赏月。</p></button>
+    <button class="ex-card" data-cat="scenic" data-detail="langde"><b>郎德上寨</b><i>凯里市郊 · 车程约 40 分钟</i><p>奥运圣火走过的地方，11 点开寨拦门酒。</p></button>
+    <button class="ex-card" data-cat="scenic" data-detail="xiasi"><b>下司古镇</b><i>凯里西 · 车程约 30 分钟</i><p>清水江商埠古镇，牌坊 + 阳明书院。</p></button>
+    <button class="ex-card" data-cat="scenic" data-detail="wudong"><b>白岩村 · 乌东苗寨</b><i>雷山县 · 小众</i><p>云海梯田，人少安静，适合发呆徒步。</p></button>
+    <button class="ex-card" data-cat="food" data-detail="suantang"><b>凯里红酸汤鱼</b><i>必吃 · 本地人认证</i><p>红酸汤发酵 90 天，配木姜子蘸水。</p></button>
+    <button class="ex-card" data-cat="food" data-detail="qingyun"><b>青云市集</b><i>贵阳 · 夜市</i><p>Day1 晚上安排，老厂区小吃宇宙。</p></button>
+    <button class="ex-card" data-cat="craft" data-detail="miaoxiu"><b>绣里淘集市</b><i>凯里 · 苗绣手作</i><p>老绣片、手工包、银饰，Day2 下午安排。</p></button>
+    <button class="ex-card" data-cat="craft" data-detail="cunt"><b>村T 演出</b><i>凯里 · 免费围观</i><p>乡土 T 台秀，周五周末场次最热闹。</p></button>
+    <button class="ex-card" data-cat="stay"><b>中濠国际酒店</b><i>贵阳 · Day1</i><p>近青云市集，落地当晚方便觅食。</p></button>
+    <button class="ex-card" data-cat="stay"><b>贵州中瑞天禧酒店</b><i>凯里 · Day2</i><p>凯里市区品质之选，停车方便。</p></button>
+    <button class="ex-card" data-cat="stay"><b>西江予风民宿（东引观景台店）</b><i>西江 · Day3</i><p>推窗即万家灯火，看夜景不用挤观景台。</p></button>
+    <button class="ex-card" data-cat="stay"><b>抱朴咖啡</b><i>凯里 · 咖啡馆</i><p>苗绣主题咖啡，逛完绣里淘歇脚。</p></button>
+  </div>
+</section>
+</main>
+
+<script src="js/data.js" defer></script>
+<script src="js/layout.js" defer></script>
+<script src="js/app.js" defer></script>
+</body>
+</html>
