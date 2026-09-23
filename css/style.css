@@ -478,3 +478,13 @@ h1, h2, h3 { font-family: var(--font-title); }
 
 /* 打印 */
 @media print { .tabbar, .topbar .search-wrap, .hot-chips { display: none; } }
+
+/* ===== 打包清单备注与提醒卡 ===== */
+.pack-note {
+  font-size: 13px; color: var(--ink-2); background: rgba(15,118,110,.06);
+  border: 1px dashed rgba(15,118,110,.35); border-radius: 10px;
+  padding: 10px 12px; margin-bottom: 12px;
+}
+.pack-note b { color: var(--teal); }
+.pack-card.tip { border-color: rgba(15,118,110,.4); background: #F0F9F7; }
+.pack-card.tip h3 { color: var(--teal); }
