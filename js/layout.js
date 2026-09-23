@@ -18,7 +18,9 @@
     { id: "culture", label: "苗侗", href: "culture.html",
       icon: '<path d="M12 3 4 8h16zM7 8v9M17 8v9M5 17h14M10 8v9M14 8v9"/>' },
     { id: "me",      label: "我的", href: "me.html",
-      icon: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-5.5 8-5.5s6.5 1.5 8 5.5"/>' }
+      icon: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-5.5 8-5.5s6.5 1.5 8 5.5"/>' },
+    { id: "food",    label: "美食", href: "food.html", hidden: true,
+      icon: '<path d="M7 3v7M4 3v4a3 3 0 0 0 6 0V3M10 3v18M17 3c-2 2-2.5 5-2.5 8H17v10"/>' }
   ];
 
   /* 热词 → 目标页 + 关键词 */
@@ -86,11 +88,11 @@
   document.body.appendChild(el('<button id="topBtn" aria-label="回到顶部" hidden>↑</button>'));
 
   /* ---------- 底部 Tab ---------- */
-  var active = NAV.filter(function (n) { return n.id === page; })[0] || NAV[0];
+  var active = NAV.filter(function (n) { return n.id === page; })[0] || null;
   document.body.appendChild(el(
     '<nav class="tabbar" aria-label="主导航">' +
-      NAV.map(function (n) {
-        return '<a class="tab' + (n.id === active.id ? " active" : "") + '" href="' + n.href + '" aria-label="' + n.label + '">' +
+      NAV.filter(function (n) { return !n.hidden; }).map(function (n) {
+        return '<a class="tab' + (active && n.id === active.id ? " active" : "") + '" href="' + n.href + '" aria-label="' + n.label + '">' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' + n.icon + '</svg>' +
           '<span>' + n.label + '</span></a>';
       }).join("") +

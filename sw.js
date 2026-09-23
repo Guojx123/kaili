@@ -7,6 +7,7 @@ var SHELL = [
   "trip.html",
   "culture.html",
   "me.html",
+  "food.html",
   "css/style.css",
   "js/app.js",
   "js/layout.js",

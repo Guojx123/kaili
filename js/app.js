@@ -240,7 +240,7 @@
 
   /* ---------- PWA：注册 Service Worker + 离线下载 ---------- */
   var OFF_KEY = "kaili-offline-ok";
-  var PAGES = ["index.html", "explore.html", "trip.html", "culture.html", "me.html"];
+  var PAGES = ["index.html", "explore.html", "trip.html", "culture.html", "me.html", "food.html"];
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").then(function () {
       if (localStorage.getItem(OFF_KEY) === "1") {
