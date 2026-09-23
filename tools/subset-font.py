@@ -15,7 +15,8 @@
 
 维护约定
     新增/修改标题文案后重跑本脚本即可。字符集来自两处合并：
-      1) 自动扫描 _site 源文件：HTML 里的 h1/h2/h3 文本 + js/data.js 的 title + js/layout.js 的顶栏标题
+      1) 自动扫描源文件：HTML 里的 h1/h2/h3 文本、静态壳的顶栏标题与底部 Tab 标签、
+         js/data.js 的 title
       2) tools/title-chars.txt —— 历史上累计的字符清单（自动追加，只增不减，防止改版丢字）
     未被收录的字符会回退到系统宋体，不会显示为方块，但字形会和其它标题不一致。
 """
@@ -81,6 +82,19 @@ def collect_chars():
     if os.path.exists(layout_js):
         for m in re.finditer(r'class="topbar-title">([^<]*)<', open(layout_js, encoding="utf-8").read()):
             chars |= set(m.group(1))
+
+    # 静态壳（顶栏标题 + 底部 Tab 标签）
+    # 壳由 tools/build-shell.py 写进各页 HTML，不再由 layout.js 注入，
+    # 所以必须从这里取字，否则改了壳文案就会漏字。
+    for name in sorted(os.listdir(ROOT)):
+        if not name.endswith(".html"):
+            continue
+        html = open(os.path.join(ROOT, name), encoding="utf-8").read()
+        for m in re.finditer(r'class="topbar-title">([^<]*)<', html):
+            chars |= set(m.group(1))
+        tabbar = re.search(r'<nav class="tabbar".*?</nav>', html, re.S)
+        if tabbar:
+            chars |= set(re.sub(r"<[^>]+>", " ", tabbar.group(0)))
 
     # 合并历史清单（只增不减，避免改版后丢字）
     if os.path.exists(CHARS_FILE):

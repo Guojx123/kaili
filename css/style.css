@@ -34,7 +34,14 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  background: var(--bg);          /* 画布底色；配合各页 head 里的内联 critical style，样式表到达前也不是白屏 */
+  /* 去掉浏览器默认的点击高亮：点底部 Tab / 卡片时会闪一层灰蓝色，很像"页面闪了一下"。
+     移除后由下方「点击反馈」小节提供受控的反馈，触感不丢。 */
+  -webkit-tap-highlight-color: transparent;
+}
 body {
   font-family: var(--font-body);
   font-size: 16px;            /* 正文 ≥16px */
@@ -98,12 +105,18 @@ h1, h2, h3 { font-family: var(--font-title); }
 .search-clear { color: var(--ink-2); width: 44px; }
 .hot-chips { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; scrollbar-width: none; }
 .hot-chips::-webkit-scrollbar { display: none; }
-.hot-chips button {
+/* 热词样式同时覆盖 <button> 和 <a class="chip-link">：
+   壳是静态生成的热词一律是 <a>（可右键/新标签打开），早先只写了 button 选择器，
+   导致热词一直以裸链接呈现、没有胶囊边框。 */
+.hot-chips button,
+.hot-chips .chip-link {
   flex: none; min-height: 32px; padding: 4px 12px;
+  display: inline-flex; align-items: center;
   border: 1px solid rgba(255,255,255,.35); border-radius: 16px;
   color: #fff; font-size: 13px;
 }
-.hot-chips button:active { background: rgba(255,255,255,.18); }
+.hot-chips button:active,
+.hot-chips .chip-link:active { background: rgba(255,255,255,.18); }
 
 /* ===== 视图容器 ===== */
 .view { padding: var(--pad); max-width: 1080px; margin: 0 auto; }
@@ -421,6 +434,17 @@ h1, h2, h3 { font-family: var(--font-title); }
 .tab svg { width: 22px; height: 22px; }
 .tab.active { color: var(--indigo); font-weight: 600; }
 .tab.active svg { stroke-width: 2.6; }
+
+/* ===== 点击反馈 =====
+   全局移除了 -webkit-tap-highlight-color（默认高亮会在点击瞬间闪一层灰蓝），
+   这里为可点元素补上受控、即时的反馈，避免"点了没反应"。 */
+.tab:active { background: rgba(27,58,92,.08); border-radius: 10px; }
+.dest-card:active,
+.craft-card:active,
+.ex-card:active,
+.cul-card:active,
+.food-item:active,
+.note-card:active { opacity: .82; }
 
 /* ===== 搜索高亮隐藏 ===== */
 .hide-by-search { display: none !important; }

@@ -1,69 +1,35 @@
-/* ===== layout.js — 公共页面壳模块 =====
- * 负责注入：吸顶顶栏（定位/搜索/热词）、底部 Tab、详情浮层（预订栏）、Toast、回到顶部
- * 页面只需提供 <body data-page="home"> 与各自的内容 <main id="app">
+/* ===== layout.js — 公共壳模块（运行时部分） =====
+ * 顶栏与底部 Tab 现在是各页 HTML 里的静态标记，由 tools/build-shell.py 统一生成。
+ *
+ * 为什么不再用 JS 注入：layout.js 是 <script defer>，浏览器解析到 body 内容就已
+ * 开始渐进渲染，而 defer 脚本要等整份 HTML 解析完才执行。慢网下这段间隔里页面是
+ * "有内容、没顶栏、没底部 Tab"的，随后壳补上、整页往下跳一下 —— 就是点击底部
+ * Tab 时看到的闪。写进 HTML 后首帧就带着壳，不存在补的过程。
+ *
+ * 本模块只负责运行时才需要的那几个元素（初始都是 hidden，晚注入不会造成视觉闪动）：
+ * 详情浮层、Toast、回到顶部，以及全站命名空间 window.KL。
+ * 改壳（导航项 / 热词 / 顶栏文案）请改 tools/build-shell.py 的模板后重跑。
  */
 (function () {
   "use strict";
 
   var page = document.body.dataset.page || "home";
 
-  /* 全站导航表 */
+  /* 全站导航表：必须与 tools/build-shell.py 里的 NAV 保持一致 */
   var NAV = [
-    { id: "home",    label: "首页", href: "index.html",
-      icon: '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/>' },
-    { id: "explore", label: "探索", href: "explore.html",
-      icon: '<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>' },
-    { id: "trip",    label: "行程", href: "trip.html",
-      icon: '<path d="M8 3v3M16 3v3"/><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M4 11h16"/>' },
-    { id: "pack",    label: "打包", href: "pack.html",
-      icon: '<rect x="5" y="8" width="14" height="12" rx="2"/><path d="M9 8V6a3 3 0 0 1 6 0v2M9 12v4M15 12v4"/>' },
-    { id: "me",      label: "我的", href: "me.html",
-      icon: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-5.5 8-5.5s6.5 1.5 8 5.5"/>' },
-    { id: "food",    label: "美食", href: "food.html", hidden: true,
-      icon: '<path d="M7 3v7M4 3v4a3 3 0 0 0 6 0V3M10 3v18M17 3c-2 2-2.5 5-2.5 8H17v10"/>' }
+    { id: "home",    label: "首页", href: "index.html" },
+    { id: "explore", label: "探索", href: "explore.html" },
+    { id: "trip",    label: "行程", href: "trip.html" },
+    { id: "pack",    label: "打包", href: "pack.html" },
+    { id: "me",      label: "我的", href: "me.html" },
+    { id: "food",    label: "美食", href: "food.html", hidden: true }
   ];
-
-  /* 热词 → 目标页 + 关键词 */
-  var CHIPS = [
-    { kw: "西江", label: "西江千户苗寨", href: "index.html?kw=西江" },
-    { kw: "下司", label: "下司古镇", href: "index.html?kw=下司" },
-    { kw: "酸汤鱼", label: "酸汤鱼", href: "explore.html?kw=酸汤鱼" },
-    { kw: "苗绣", label: "苗绣", href: "explore.html?kw=苗绣" }
-  ];
-
-  var HAS_SEARCH = page === "home" || page === "explore";
 
   function el(html) {
     var t = document.createElement("template");
     t.innerHTML = html.trim();
     return t.content.firstElementChild;
   }
-
-  /* ---------- 顶栏 ---------- */
-  var header = el(
-    '<header class="topbar">' +
-      '<div class="topbar-row">' +
-        '<button class="loc-btn" id="locBtn" aria-label="定位">' +
-          '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-5.5-7-11a7 7 0 1 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>' +
-          '<span id="locText">凯里 · 贵州</span>' +
-          '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>' +
-        '</button>' +
-        '<span class="topbar-title">苗侗明珠 · 山水凯里</span>' +
-      '</div>' +
-      (HAS_SEARCH
-        ? '<div class="search-wrap">' +
-            '<svg class="search-ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>' +
-            '<input id="searchInput" type="search" placeholder="搜索：西江 / 下司 / 酸汤鱼 / 苗绣" autocomplete="off" aria-label="搜索目的地、美食、非遗">' +
-            '<button class="search-clear" id="searchClear" hidden aria-label="清空搜索">✕</button>' +
-          '</div>' +
-          '<div class="hot-chips" id="hotChips">' +
-            CHIPS.map(function (c) {
-              return '<a class="chip-link" href="' + c.href + '" data-kw="' + c.kw + '">' + c.label + '</a>';
-            }).join("") +
-          '</div>'
-        : "") +
-    '</header>');
-  document.body.insertBefore(header, document.body.firstChild);
 
   /* ---------- Toast ---------- */
   document.body.appendChild(el('<div class="toast" id="toast" hidden></div>'));
@@ -86,17 +52,6 @@
 
   /* ---------- 回到顶部 ---------- */
   document.body.appendChild(el('<button id="topBtn" aria-label="回到顶部" hidden>↑</button>'));
-
-  /* ---------- 底部 Tab ---------- */
-  var active = NAV.filter(function (n) { return n.id === page; })[0] || null;
-  document.body.appendChild(el(
-    '<nav class="tabbar" aria-label="主导航">' +
-      NAV.filter(function (n) { return !n.hidden; }).map(function (n) {
-        return '<a class="tab' + (active && n.id === active.id ? " active" : "") + '" href="' + n.href + '" aria-label="' + n.label + '">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' + n.icon + '</svg>' +
-          '<span>' + n.label + '</span></a>';
-      }).join("") +
-    '</nav>'));
 
   /* ---------- 全站命名空间 ---------- */
   window.KL = {

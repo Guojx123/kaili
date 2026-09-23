@@ -10,10 +10,50 @@
 <link rel="icon" href="assets/icon-192.png">
 <link rel="apple-touch-icon" href="assets/icon-192.png">
 <!-- 标题字体已自托管为子集（assets/fonts/noto-serif-sc-subset.woff2），不再请求 Google Fonts -->
+<!-- shell:critical — 首帧即上主题底色，避免外部样式表到达前出现白闪 -->
+<style>html{background:#FAF7F0}</style>
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/noto-serif-sc-subset.woff2" crossorigin>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body data-page="pack">
+<!-- shell:topbar — 由 tools/build-shell.py 生成，改壳请改脚本后重跑 -->
+<header class="topbar">
+  <div class="topbar-row">
+    <button class="loc-btn" id="locBtn" aria-label="定位">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-5.5-7-11a7 7 0 1 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+      <span id="locText">凯里 · 贵州</span>
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <span class="topbar-title">苗侗明珠 · 山水凯里</span>
+  </div>
+</header>
+<!-- /shell:topbar -->
+
+<!-- shell:tabbar — 由 tools/build-shell.py 生成，改壳请改脚本后重跑 -->
+<nav class="tabbar" aria-label="主导航">
+  <a class="tab" href="index.html" aria-label="首页">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+    <span>首页</span>
+  </a>
+  <a class="tab" href="explore.html" aria-label="探索">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>
+    <span>探索</span>
+  </a>
+  <a class="tab" href="trip.html" aria-label="行程">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v3M16 3v3"/><rect x="4" y="6" width="16" height="15" rx="2"/><path d="M4 11h16"/></svg>
+    <span>行程</span>
+  </a>
+  <a class="tab active" href="pack.html" aria-label="打包">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="8" width="14" height="12" rx="2"/><path d="M9 8V6a3 3 0 0 1 6 0v2M9 12v4M15 12v4"/></svg>
+    <span>打包</span>
+  </a>
+  <a class="tab" href="me.html" aria-label="我的">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-5.5 8-5.5s6.5 1.5 8 5.5"/></svg>
+    <span>我的</span>
+  </a>
+</nav>
+<!-- /shell:tabbar -->
+
 
 <main id="app">
 <section class="view" data-view="pack">

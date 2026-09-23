@@ -252,7 +252,7 @@
 
   /* ---------- PWA：注册 Service Worker + 离线下载 ---------- */
   var OFF_KEY = "kaili-offline-ok";
-  var CACHE_NAME = "kaili-trip-v6";   // 必须与 sw.js 的 CACHE 一致，否则离线缓存会被 SW 激活时清理掉
+  var CACHE_NAME = "kaili-trip-v7";   // 必须与 sw.js 的 CACHE 一致，否则离线缓存会被 SW 激活时清理掉
   var PAGES = ["index.html", "explore.html", "trip.html", "pack.html", "me.html", "food.html"];
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js").then(function () {

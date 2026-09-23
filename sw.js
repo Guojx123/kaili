@@ -1,11 +1,13 @@
 /* Service Worker：凯里行 PWA 离线支持
- * v6 策略：全站 stale-while-revalidate
+ * v7 策略：全站 stale-while-revalidate
  *   - 命中缓存 → 立即返回（首屏不等网络），同时后台静默拉取最新版写回缓存
  *   - 未命中缓存 → 走网络，失败时回退到相应兜底页
  * 相比 v4 的"网络优先"，重复访问不再被网络往返卡住；部署新版后下一次导航自动生效。
  * v6 变更：标题字体改为自托管子集，纳入预缓存清单。
+ * v7 变更：顶栏/底部 Tab 改为 HTML 静态标记（不再由 defer 脚本注入），HTML 与
+ *          layout.js、style.css 全部更新，必须升版本让老缓存失效。
  */
-var CACHE = "kaili-trip-v6";
+var CACHE = "kaili-trip-v7";
 var SHELL = [
   "./",
   "index.html",
